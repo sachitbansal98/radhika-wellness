@@ -9,7 +9,7 @@ const C = {
 };
 
 /* ─── bunny avatar ─── */
-const BUNNY_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAA8ADwDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDshcQk4E0ZPs4p5PGa8yF1kjIxgelSnVpbaBnjuJUYDAwxxWFzo5Db8QeLDazvaaeqmRDh5W5Cn0A71yc+r6hPIXlvZ2Y+jkfoKznnUkndknk1HvkZsRxlvTHNWiDdtPEeqWrArdu6j+CQ7ga7nw/rkWsW7EL5c0f30zkfUe1eVFZl/wBYCM9Bitnwtfrp+sxvJIVicFX+n/66TCzPU80tZQ17TRjNx/443+FSrrWnEZFyv5GouOzPPZrO4j4O0tnAHrVO5RmjljYEED+VdYyg9OhrH1Pylu4Y34Q5L4461mpHQ0VNJt43jUTID7MK6JLeFE+SFF+gFYpsZSCIFjLDIywyfatCFJYoHiLHhRn2pSd9SkuhU1FbZiQWj3dOvNYht5ILxc4I5I+ldANOmEzSCYiE4woA/Go5Y1Mc+1QWb92pxTUrEuN9yktw5ABzThOecPtGehFN+y3B52LtI3ZzimLBLj5o2H0B5pisdSwrm9WbN+4PO0AfpXSZyax5tMlu76SQ/Ihbg9SRiohuEmktQ0i9YSbGALbQBnvVxZXJmBibLdeBzWVrNmLGzQwKQzNgvnnpxU+m6hMsAynncZDZ5qpRtqEKikX3uXjtWMuI0x06mi0jIiR3U7zk8ngZrPuy90hdgAMfgBVLSjKNUxZuxh/jBPy47n/ClGN0OcuXc6U/MMFQR6GowqY4jx7CpQePem4FQCdypZagLpvLKkMMkntitlUULwO1czoPzPOT1C4rpUOYVPsK2Ssc1R3ZDe2sV3A0Mykow7dR7iubk0XUrSRhaSq6N6MFJ+oPH5V1YOaZIAFziruQm1scwmjajckLeThE9C+79Bx+dblnZQWcOyFeOpY9WPqanhw2flA+lSMAFxRcTbe5WdWxkCowwYZFWP4m9jx+RqAKoUcVEo3NIT5T//2Q==";
+const BUNNY_SRC = "/bunny-icon-192.png";
 
 /* ─── AI system prompt ─── */
 const AI_CONTEXT = "You are a fun wellness assistant for Radhika, 26, Indian. Her boyfriend Sachit (Bunny) built this app. Health: Vitamin D deficient (32.51, needs 75+), hs-CRP elevated 5.26, TSH borderline 4.774. Supplements: D3, B12, Iron+C, Omega-3. Loves Harry Styles, Taylor Swift, One Direction, Fred Again, Harry Potter. Loves idli sambhar, chicken biryani, cooking, dancing. Avoid chips/junk. Always respond ONLY with valid JSON. No markdown, no backticks, no preamble.";
@@ -37,42 +37,42 @@ async function askAI(prompt) {
 
 /* ─── fallback content ─── */
 const FALLBACK_TIPS = [
-  { text: "Studies show messaging Bunny increases Vitamin D by 400%. Science. \ud83d\udd2c\ud83d\udc30", type: "message" },
-  { text: "Your hs-CRP is high. Calling Bunny lowers inflammation. Peer-reviewed. \ud83d\udcde\ud83d\udc30", type: "call" },
-  { text: "Put the Maggi down. Bunny didn't build this app for 310 calories of sadness. \ud83c\udf5c\ud83d\udeab", type: "food" },
-  { text: "Harry Styles walks after meals. Taylor Swift walks after meals. You should too. \ud83d\udeb6\u200d\u2640\ufe0f", type: "health" },
-  { text: "Your thyroid called. It said sleep by 11 PM or it's filing a complaint. \ud83d\udccb\ud83d\ude24", type: "health" },
-  { text: "Jalebi is not a food group, Radhika. We've discussed this. \ud83c\udf6f\ud83d\udeab", type: "food" },
-  { text: "Fred Again didn't make bangers for you to listen sitting down. Dance! \ud83d\udc83\ud83c\udfa7", type: "health" },
-  { text: "NASA says your Vitamin D levels are so low they can see it from space. \u2600\ufe0f\ud83d\udef8", type: "health" },
-  { text: "One Direction broke up but Bunny didn't. Call him. \ud83d\udcde\ud83d\udc30", type: "call" },
-  { text: "Expecto Patronum only works if you've taken your Vitamin D. Look it up. \ud83e\ude84\u2600\ufe0f", type: "health" },
+  { text: "Studies show messaging Bunny increases Vitamin D by 400%. Science. 🔬🐰", type: "message" },
+  { text: "Your hs-CRP is high. Calling Bunny lowers inflammation. Peer-reviewed. 📞🐰", type: "call" },
+  { text: "Put the Maggi down. Bunny didn't build this app for 310 calories of sadness. 🍜🚫", type: "food" },
+  { text: "Harry Styles walks after meals. Taylor Swift walks after meals. You should too. 🚶‍♀️", type: "health" },
+  { text: "Your thyroid called. It said sleep by 11 PM or it's filing a complaint. 📋😤", type: "health" },
+  { text: "Jalebi is not a food group, Radhika. We've discussed this. 🍯🚫", type: "food" },
+  { text: "Fred Again didn't make bangers for you to listen sitting down. Dance! 💃🎧", type: "health" },
+  { text: "NASA says your Vitamin D levels are so low they can see it from space. ☀️🛸", type: "health" },
+  { text: "One Direction broke up but Bunny didn't. Call him. 📞🐰", type: "call" },
+  { text: "Expecto Patronum only works if you've taken your Vitamin D. Look it up. 🪄☀️", type: "health" },
 ];
 
 const FALLBACK_ROASTS = [
-  { roast: "Radhika. Put. The chips. DOWN.", sub: "Harry Styles didn't say Treat people with Lays.", emoji: "\ud83d\udeab" },
-  { roast: "Expelliarmus those chips!", sub: "10 points from Gryffindor if you eat them.", emoji: "\ud83e\ude84" },
-  { roast: "Bunny made this whole app for you.", sub: "Don't make him sad. Eat makhana instead.", emoji: "\ud83e\udd7a" },
-  { roast: "Taylor would NOT approve.", sub: "Shake off the craving. Choose fruit.", emoji: "\ud83c\udf4e" },
+  { roast: "Radhika. Put. The chips. DOWN.", sub: "Harry Styles didn't say Treat people with Lays.", emoji: "🚫" },
+  { roast: "Expelliarmus those chips!", sub: "10 points from Gryffindor if you eat them.", emoji: "🪄" },
+  { roast: "Bunny made this whole app for you.", sub: "Don't make him sad. Eat makhana instead.", emoji: "🥺" },
+  { roast: "Taylor would NOT approve.", sub: "Shake off the craving. Choose fruit.", emoji: "🍎" },
 ];
 
 const CHIP_ALTS = [
-  { name: "Roasted Makhana", cal: "90 cal/katori", why: "Light, crunchy, anti-inflammatory", emoji: "\ud83c\udf30" },
-  { name: "Roasted Chana", cal: "120 cal/katori", why: "High protein, great crunch", emoji: "\ud83e\udeb6" },
-  { name: "Fruit Chaat", cal: "80 cal/bowl", why: "Vitamins + fiber + natural sugar", emoji: "\ud83c\udf4e" },
-  { name: "Sprouts Salad", cal: "100 cal/bowl", why: "Protein-packed, refreshing", emoji: "\ud83c\udf31" },
-  { name: "Air-popped Popcorn", cal: "95 cal/bowl", why: "Whole grain, satisfying crunch", emoji: "\ud83c\udf7f" },
-  { name: "Cucumber + Hummus", cal: "70 cal/serving", why: "Hydrating, protein from hummus", emoji: "\ud83e\udd52" },
-  { name: "Roasted Peanuts", cal: "140 cal/handful", why: "Healthy fats, very filling", emoji: "\ud83e\udd5c" },
+  { name: "Roasted Makhana", cal: "90 cal/katori", why: "Light, crunchy, anti-inflammatory", emoji: "🌰" },
+  { name: "Roasted Chana", cal: "120 cal/katori", why: "High protein, great crunch", emoji: "🪶" },
+  { name: "Fruit Chaat", cal: "80 cal/bowl", why: "Vitamins + fiber + natural sugar", emoji: "🍎" },
+  { name: "Sprouts Salad", cal: "100 cal/bowl", why: "Protein-packed, refreshing", emoji: "🌱" },
+  { name: "Air-popped Popcorn", cal: "95 cal/bowl", why: "Whole grain, satisfying crunch", emoji: "🍿" },
+  { name: "Cucumber + Hummus", cal: "70 cal/serving", why: "Hydrating, protein from hummus", emoji: "🥒" },
+  { name: "Roasted Peanuts", cal: "140 cal/handful", why: "Healthy fats, very filling", emoji: "🥜" },
 ];
 
-const BREATHE_MSGS = ["Hey. Breathe. You're doing amazing. \ud83d\udc9a", "Inhale the good stuff, exhale the stress. \ud83c\udf3f", "Close your eyes. You're safe. Let's breathe together. \u2728", "As Taylor says \u2014 you need to calm down. \ud83e\udec1"];
+const BREATHE_MSGS = ["Hey. Breathe. You're doing amazing. 💚", "Inhale the good stuff, exhale the stress. 🌿", "Close your eyes. You're safe. Let's breathe together. ✨", "As Taylor says — you need to calm down. 🫁"];
 
 const SUPPS = [
-  { name: "Vitamin D3 (60,000 IU)", when: "Morning \u00b7 Weekly", emoji: "\u2600\ufe0f", tip: "Take with a fatty meal \u2014 ghee on roti works!" },
-  { name: "Vitamin B12", when: "Morning \u00b7 Daily", emoji: "\ud83d\udc8a", tip: "Your B12 is 286 \u2014 low-normal. Keep supplementing." },
-  { name: "Iron + Vitamin C", when: "Afternoon \u00b7 Daily", emoji: "\ud83e\ude78", tip: "Take with nimbu pani. NO chai for 2 hrs after!" },
-  { name: "Omega-3 Fish Oil", when: "Dinner \u00b7 Daily", emoji: "\ud83d\udc1f", tip: "Fights inflammation \u2014 your CRP needs this." },
+  { name: "Vitamin D3 (60,000 IU)", when: "Morning · Weekly", emoji: "☀️", tip: "Take with a fatty meal — ghee on roti works!" },
+  { name: "Vitamin B12", when: "Morning · Daily", emoji: "💊", tip: "Your B12 is 286 — low-normal. Keep supplementing." },
+  { name: "Iron + Vitamin C", when: "Afternoon · Daily", emoji: "🩸", tip: "Take with nimbu pani. NO chai for 2 hrs after!" },
+  { name: "Omega-3 Fish Oil", when: "Dinner · Daily", emoji: "🐟", tip: "Fights inflammation — your CRP needs this." },
 ];
 
 const QUOTES = [
@@ -104,20 +104,20 @@ function BunnyTip() {
   };
 
   var actionBtn = null;
-  if (tip.type === "call") actionBtn = <a href="tel:9146244811" className="bunny-action-btn bunny-call">\ud83d\udcde Call Bunny</a>;
-  if (tip.type === "message") actionBtn = <a href="sms:9146244811" className="bunny-action-btn bunny-msg">\ud83d\udcac Message Bunny</a>;
+  if (tip.type === "call") actionBtn = <a href="tel:9146244811" className="bunny-action-btn bunny-call">📞 Call Bunny</a>;
+  if (tip.type === "message") actionBtn = <a href="sms:9146244811" className="bunny-action-btn bunny-msg">💬 Message Bunny</a>;
 
   return (
     <div className="bunny-tip-card">
       <div className="bunny-tip-header">
         <img src={BUNNY_SRC} alt="Bunny" className="bunny-avatar" />
         <span className="bunny-tip-label">Bunny says</span>
-        <button onClick={fetchTip} className="bunny-refresh" disabled={loading}>{loading ? "\u23f3" : "\u21bb"}</button>
+        <button onClick={fetchTip} className="bunny-refresh" disabled={loading}>{loading ? "⏳" : "↻"}</button>
       </div>
-      <p className={"bunny-tip-text" + (anim ? " bunny-tip-in" : "")}>{loading ? "Bunny is thinking... \ud83d\udc30" : tip.text}</p>
+      <p className={"bunny-tip-text" + (anim ? " bunny-tip-in" : "")}>{loading ? "Bunny is thinking... 🐰" : tip.text}</p>
       <div className="bunny-tip-actions">
         {!loading && actionBtn}
-        <button onClick={fetchTip} className="bunny-another" disabled={loading}>{loading ? "Thinking..." : "Fresh tip from AI \ud83e\udd16"}</button>
+        <button onClick={fetchTip} className="bunny-another" disabled={loading}>{loading ? "Thinking..." : "Fresh tip from AI 🤖"}</button>
       </div>
     </div>
   );
@@ -162,9 +162,9 @@ function ChipPopup(props) {
           })}
         </div>
         <div className="chip-compare">
-          <span style={{ fontSize: 11, color: C.mist }}>1 packet of chips = <strong style={{ color: C.burg }}>274 cal</strong>, mostly fat & sodium \ud83d\ude2c</span>
+          <span style={{ fontSize: 11, color: C.mist }}>1 packet of chips = <strong style={{ color: C.burg }}>274 cal</strong>, mostly fat & sodium 😬</span>
         </div>
-        <button className="btn-chip-close" onClick={props.onClose}>Fine, I'll eat something healthy \ud83d\ude44</button>
+        <button className="btn-chip-close" onClick={props.onClose}>Fine, I'll eat something healthy 🙄</button>
       </div>
     </div>
   );
@@ -198,19 +198,19 @@ function Breathe(props) {
   }, [phase]);
 
   var sz = phase === "in" ? 160 : phase === "out" ? 90 : phase === "hold" ? 140 : 120;
-  var lbl = phase === "in" ? "Breathe in" : phase === "hold" ? "Hold gently" : phase === "out" ? "Breathe out" : phase === "done" ? "Beautiful \u2728" : "";
+  var lbl = phase === "in" ? "Breathe in" : phase === "hold" ? "Hold gently" : phase === "out" ? "Breathe out" : phase === "done" ? "Beautiful ✨" : "";
 
   return (
     <div className="overlay">
       <div className="breathe-card">
         <p className="breathe-quote">{pick(BREATHE_MSGS)}</p>
-        <p style={{ fontSize: 11, color: C.mist, margin: "0 0 24px", letterSpacing: 1 }}>4 \u2013 7 \u2013 8 TECHNIQUE</p>
+        <p style={{ fontSize: 11, color: C.mist, margin: "0 0 24px", letterSpacing: 1 }}>4 – 7 – 8 TECHNIQUE</p>
         {phase === "ready" ? (
-          <button className="btn-primary" onClick={start}>Begin \ud83c\udf3f</button>
+          <button className="btn-primary" onClick={start}>Begin 🌿</button>
         ) : (
           <>
             <div className="breathe-circle" style={{ width: sz, height: sz, background: phase === "done" ? C.olive : C.oliveGhost, boxShadow: "0 0 " + (phase === "hold" ? 60 : 24) + "px " + C.olivePale }}>
-              <span style={{ fontSize: phase === "done" ? 22 : 32, fontWeight: 700, color: phase === "done" ? "#fff" : C.olive }}>{phase === "done" ? "\ud83c\udf1f" : sec}</span>
+              <span style={{ fontSize: phase === "done" ? 22 : 32, fontWeight: 700, color: phase === "done" ? "#fff" : C.olive }}>{phase === "done" ? "🌟" : sec}</span>
               <span style={{ fontSize: 12, color: phase === "done" ? "#fff" : C.oliveMid, marginTop: 2 }}>{lbl}</span>
             </div>
             <p style={{ fontSize: 11, color: C.mist, marginTop: 16 }}>Round {Math.min(cy + 1, 4)} of 4</p>
@@ -268,14 +268,14 @@ function MealLog(props) {
     <div className="overlay" style={{ alignItems: "flex-end" }}>
       <div className="meal-sheet">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <h3 className="section-title" style={{ margin: 0 }}>Log a Meal \ud83c\udf7d\ufe0f</h3>
-          <button onClick={props.onClose} style={{ background: "none", border: "none", fontSize: 24, color: C.mist, cursor: "pointer", lineHeight: 1 }}>\u00d7</button>
+          <h3 className="section-title" style={{ margin: 0 }}>Log a Meal 🍽️</h3>
+          <button onClick={props.onClose} style={{ background: "none", border: "none", fontSize: 24, color: C.mist, cursor: "pointer", lineHeight: 1 }}>×</button>
         </div>
-        <p className="hint">Type anything you ate \u2014 AI will calculate macros \u2728</p>
+        <p className="hint">Type anything you ate — AI will calculate macros ✨</p>
         <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
           <input ref={inputRef} value={txt} onChange={function(e) { setTxt(e.target.value); }} onKeyDown={function(e) { if (e.key === "Enter") analyze(); }}
             placeholder="half plate biryani, raita, lassi..." className="meal-input" disabled={loading} />
-          <button onClick={analyze} className="btn-primary" style={{ padding: "0 20px", fontSize: 14 }} disabled={loading}>{loading ? "\u23f3" : "Analyze"}</button>
+          <button onClick={analyze} className="btn-primary" style={{ padding: "0 20px", fontSize: 14 }} disabled={loading}>{loading ? "⏳" : "Analyze"}</button>
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 16 }}>
           {["3 idli, sambhar", "chicken biryani, raita", "2 roti, dal makhani", "paneer bhurji, paratha", "poha, chai"].map(function(s) {
@@ -285,12 +285,12 @@ function MealLog(props) {
 
         {loading && (
           <div style={{ textAlign: "center", padding: "20px 0", color: C.olive }}>
-            <p style={{ fontSize: 14 }}>\ud83e\udd16 AI is calculating macros...</p>
+            <p style={{ fontSize: 14 }}>🤖 AI is calculating macros...</p>
             <p style={{ fontSize: 11, color: C.mist }}>Analyzing your meal with Claude</p>
           </div>
         )}
 
-        {chipWarn && <div className="chip-warning">\ud83d\udeab {chipWarn}</div>}
+        {chipWarn && <div className="chip-warning">🚫 {chipWarn}</div>}
 
         {items.length > 0 && (
           <div className="meal-items">
@@ -298,14 +298,14 @@ function MealLog(props) {
               return (
                 <div key={i} className="meal-row">
                   <div style={{ flex: 1 }}>
-                    <span className="meal-name">{(it.qty || 1) > 1 ? it.qty + "\u00d7 " : ""}{it.name}</span>
+                    <span className="meal-name">{(it.qty || 1) > 1 ? it.qty + "× " : ""}{it.name}</span>
                     <span className="meal-unit">{it.unit}</span>
                   </div>
                   <div style={{ textAlign: "right", marginRight: 8 }}>
                     <span className="meal-cal">{it.cal}</span>
-                    <span className="meal-macro">P:{it.protein} \u00b7 C:{it.carbs} \u00b7 F:{it.fat}</span>
+                    <span className="meal-macro">P:{it.protein} · C:{it.carbs} · F:{it.fat}</span>
                   </div>
-                  <button onClick={function() { removeItem(i); }} style={{ background: "none", border: "none", color: C.mist, cursor: "pointer", fontSize: 16, padding: 0 }}>\u00d7</button>
+                  <button onClick={function() { removeItem(i); }} style={{ background: "none", border: "none", color: C.mist, cursor: "pointer", fontSize: 16, padding: 0 }}>×</button>
                 </div>
               );
             })}
@@ -313,7 +313,7 @@ function MealLog(props) {
               <span style={{ fontWeight: 700, fontSize: 15 }}>Total</span>
               <div style={{ textAlign: "right" }}>
                 <span style={{ fontSize: 18, fontWeight: 700, color: C.burg }}>{Math.round(tot.cal)} cal</span>
-                <span className="meal-macro" style={{ display: "block" }}>P: {Math.round(tot.p)}g \u00b7 C: {Math.round(tot.c)}g \u00b7 F: {Math.round(tot.f)}g</span>
+                <span className="meal-macro" style={{ display: "block" }}>P: {Math.round(tot.p)}g · C: {Math.round(tot.c)}g · F: {Math.round(tot.f)}g</span>
               </div>
             </div>
           </div>
@@ -321,11 +321,11 @@ function MealLog(props) {
 
         {aiNote && items.length > 0 && (
           <div style={{ background: C.oliveGhost, borderRadius: 12, padding: "10px 14px", marginBottom: 12, fontSize: 13, color: C.olive, lineHeight: 1.5 }}>
-            \ud83e\udd16 {aiNote}
+            🤖 {aiNote}
           </div>
         )}
 
-        <button onClick={save} disabled={!items.length || loading} className="btn-save">{loading ? "Analyzing..." : items.length ? "Save Meal \u2705" : "Type what you ate above"}</button>
+        <button onClick={save} disabled={!items.length || loading} className="btn-save">{loading ? "Analyzing..." : items.length ? "Save Meal ✅" : "Type what you ate above"}</button>
       </div>
     </div>
   );
@@ -353,7 +353,7 @@ export default function App() {
     setShowMeal(false);
     (async function() {
       var r = await askAI("Radhika just finished eating. Generate a SHORT (1-2 sentence) funny post-meal walk reminder. Reference Harry Styles, Fred Again, Dumbledore, or Taylor Swift. Respond as JSON: {\"message\":\"the walk nudge with emojis\"}");
-      flash(r && r.message ? r.message : "You just ate! Time for a 10-min walk \ud83d\udeb6\u200d\u2640\ufe0f");
+      flash(r && r.message ? r.message : "You just ate! Time for a 10-min walk 🚶‍♀️");
     })();
   };
 
@@ -373,9 +373,9 @@ export default function App() {
       {toast && <div className="toast">{toast}</div>}
 
       <header className="header">
-        <div className="header-top"><span className="header-brand">\ud83c\udf3f</span></div>
+        <div className="header-top"><span className="header-brand">🌿</span></div>
         <h1 className="header-greeting">{greet}, Radhika</h1>
-        <p className="header-quote">"{quote[0]}"<br /><span style={{ fontWeight: 400, fontSize: 11 }}>\u2014 {quote[1]}</span></p>
+        <p className="header-quote">"{quote[0]}"<br /><span style={{ fontWeight: 400, fontSize: 11 }}>— {quote[1]}</span></p>
       </header>
 
       <main className="content">
@@ -389,17 +389,17 @@ export default function App() {
 
             <div className="action-grid-3">
               <button className="action-card action-burg" onClick={function() { setShowMeal(true); }}>
-                <span className="action-emoji">\ud83c\udf7d\ufe0f</span><span className="action-title">Log Meal</span><span className="action-sub">AI-powered</span>
+                <span className="action-emoji">🍽️</span><span className="action-title">Log Meal</span><span className="action-sub">AI-powered</span>
               </button>
               <button className="action-card action-olive" onClick={function() { setShowBreathe(true); }}>
-                <span className="action-emoji">\ud83e\udec1</span><span className="action-title">Breathe</span><span className="action-sub">4-7-8 guided</span>
+                <span className="action-emoji">🫁</span><span className="action-title">Breathe</span><span className="action-sub">4-7-8 guided</span>
               </button>
               <a href="tel:9146244811" className="action-card action-bunny" style={{ textDecoration: "none" }}>
                 <img src={BUNNY_SRC} alt="Bunny" style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(255,255,255,0.4)" }} />
                 <span className="action-title">Call Bunny</span><span className="action-sub">He misses you</span>
               </a>
               <button className="action-card action-outline-burg" onClick={function() { setShowChips(true); }}>
-                <span className="action-emoji">\ud83d\udeab</span><span className="action-title">No Chips!</span><span className="action-sub">AI roast</span>
+                <span className="action-emoji">🚫</span><span className="action-title">No Chips!</span><span className="action-sub">AI roast</span>
               </button>
               <button className="action-card action-outline-olive" onClick={function() {
                 var artists = [
@@ -410,23 +410,23 @@ export default function App() {
                 var a = pick(artists);
                 window.location.href = a.spotify;
                 setTimeout(function() { window.open(a.web, "_blank"); }, 1500);
-                flash("\ud83d\udc83 Playing " + a.name + " on Spotify!\nDance for 10 minutes. No excuses.");
+                flash("💃 Playing " + a.name + " on Spotify!\nDance for 10 minutes. No excuses.");
               }}>
-                <span className="action-emoji">\ud83d\udc83</span><span className="action-title">Dance Break</span><span className="action-sub">Opens Spotify</span>
+                <span className="action-emoji">💃</span><span className="action-title">Dance Break</span><span className="action-sub">Opens Spotify</span>
               </button>
-              <button className="action-card action-outline-warm" onClick={function() { flash("\ud83d\udca7 Drink a glass of water right now!\nYour Vitamin D absorption needs hydration too."); }}>
-                <span className="action-emoji">\ud83d\udca7</span><span className="action-title">Drink Water</span><span className="action-sub">Stay hydrated</span>
+              <button className="action-card action-outline-warm" onClick={function() { flash("💧 Drink a glass of water right now!\nYour Vitamin D absorption needs hydration too."); }}>
+                <span className="action-emoji">💧</span><span className="action-title">Drink Water</span><span className="action-sub">Stay hydrated</span>
               </button>
             </div>
 
             <BunnyTip />
 
-            <h3 className="section-title" style={{ marginTop: 24 }}>Daily Supplements \ud83d\udc8a</h3>
+            <h3 className="section-title" style={{ marginTop: 24 }}>Daily Supplements 💊</h3>
             <div className="supp-list">
               {supps.map(function(s, i) {
                 return (
                   <button key={i} className={"supp-row" + (s.done ? " supp-done" : "")} onClick={function() { toggleSupp(i); }}>
-                    <div className={"supp-check" + (s.done ? " checked" : "")}>{s.done ? "\u2713" : ""}</div>
+                    <div className={"supp-check" + (s.done ? " checked" : "")}>{s.done ? "✓" : ""}</div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p className="supp-name">{s.emoji} {s.name}</p>
                       <p className="supp-tip">{s.tip}</p>
@@ -439,7 +439,7 @@ export default function App() {
 
             {meals.length > 0 && (
               <>
-                <h3 className="section-title" style={{ marginTop: 28 }}>Today's Meals \ud83d\udccb</h3>
+                <h3 className="section-title" style={{ marginTop: 28 }}>Today's Meals 📋</h3>
                 {meals.map(function(m, i) {
                   return (
                     <div key={i} className="logged-meal">
@@ -448,14 +448,14 @@ export default function App() {
                         <span style={{ fontSize: 15, fontWeight: 700, color: C.burg }}>{Math.round(m.tot.cal)} cal</span>
                       </div>
                       <p style={{ margin: 0, fontSize: 13, color: C.charcoal, textTransform: "capitalize" }}>
-                        {m.items.map(function(it) { return ((it.qty || 1) > 1 ? it.qty + "\u00d7 " : "") + it.name; }).join(", ")}
+                        {m.items.map(function(it) { return ((it.qty || 1) > 1 ? it.qty + "× " : "") + it.name; }).join(", ")}
                       </p>
                       <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
                         <span className="macro-tag tag-p">P: {Math.round(m.tot.p)}g</span>
                         <span className="macro-tag tag-c">C: {Math.round(m.tot.c)}g</span>
                         <span className="macro-tag tag-f">F: {Math.round(m.tot.f)}g</span>
                       </div>
-                      {m.note && <p style={{ margin: "8px 0 0", fontSize: 12, color: C.olive, fontStyle: "italic" }}>{"\ud83e\udd16"} {m.note}</p>}
+                      {m.note && <p style={{ margin: "8px 0 0", fontSize: 12, color: C.olive, fontStyle: "italic" }}>{"🤖"} {m.note}</p>}
                     </div>
                   );
                 })}
@@ -466,14 +466,14 @@ export default function App() {
 
         {tab === "health" && (
           <div className="fade-in">
-            <h3 className="section-title">Health Dashboard \ud83e\ude7a</h3>
-            <p className="hint" style={{ marginBottom: 20 }}>From your blood report \u00b7 June 4, 2026 \u00b7 Dr Lal PathLabs</p>
-            <div className="health-alert alert-red"><div className="alert-header"><span>\u26a0\ufe0f</span><strong>Vitamin D \u2014 Deficient</strong></div><p>32.51 nmol/L \u2014 needs to be above 75. Take D3 as prescribed, get 20-30 min morning sun daily. #1 priority.</p></div>
-            <div className="health-alert alert-amber"><div className="alert-header"><span>\u26a1</span><strong>hs-CRP \u2014 Elevated (Inflammation)</strong></div><p>5.26 mg/L \u2014 should be below 1. Omega-3, sleep, and stress management will help. Retest in 6 weeks.</p></div>
-            <div className="health-alert alert-yellow"><div className="alert-header"><span>\ud83d\udc40</span><strong>TSH \u2014 Borderline High</strong></div><p>4.774 \u00b5IU/mL (max is 4.780). Needs monitoring. Good sleep + less stress are key. Retest in 3 months.</p></div>
-            <h3 className="section-title" style={{ marginTop: 28 }}>All Normal \u2705</h3>
+            <h3 className="section-title">Health Dashboard 🩺</h3>
+            <p className="hint" style={{ marginBottom: 20 }}>From your blood report · June 4, 2026 · Dr Lal PathLabs</p>
+            <div className="health-alert alert-red"><div className="alert-header"><span>⚠️</span><strong>Vitamin D — Deficient</strong></div><p>32.51 nmol/L — needs to be above 75. Take D3 as prescribed, get 20-30 min morning sun daily. #1 priority.</p></div>
+            <div className="health-alert alert-amber"><div className="alert-header"><span>⚡</span><strong>hs-CRP — Elevated (Inflammation)</strong></div><p>5.26 mg/L — should be below 1. Omega-3, sleep, and stress management will help. Retest in 6 weeks.</p></div>
+            <div className="health-alert alert-yellow"><div className="alert-header"><span>👀</span><strong>TSH — Borderline High</strong></div><p>4.774 µIU/mL (max is 4.780). Needs monitoring. Good sleep + less stress are key. Retest in 3 months.</p></div>
+            <h3 className="section-title" style={{ marginTop: 28 }}>All Normal ✅</h3>
             <div className="health-grid">
-              {[["Fasting Glucose", "79 mg/dL", "\u2713"], ["HbA1c", "5.4%", "\u2713"], ["Iron", "87 \u00b5g/dL", "\u2713"], ["B12", "286 pg/mL", "Low-normal"], ["Hemoglobin", "12.2 g/dL", "\u2713"], ["Total Cholesterol", "175 mg/dL", "\u2713"], ["HDL (good)", "60 mg/dL", "\u2713"], ["LDL", "96 mg/dL", "\u2713"], ["Triglycerides", "71 mg/dL", "\u2713"], ["SGOT / SGPT", "21 / 19 U/L", "\u2713"], ["Creatinine", "0.55 mg/dL", "\u2713"], ["Uric Acid", "4.1 mg/dL", "\u2713"], ["Calcium", "9.6 mg/dL", "\u2713"], ["FT3 / FT4", "3.07 / 1.22", "\u2713"], ["Platelets", "267K", "\u2713"]].map(function(row, i) {
+              {[["Fasting Glucose", "79 mg/dL", "✓"], ["HbA1c", "5.4%", "✓"], ["Iron", "87 µg/dL", "✓"], ["B12", "286 pg/mL", "Low-normal"], ["Hemoglobin", "12.2 g/dL", "✓"], ["Total Cholesterol", "175 mg/dL", "✓"], ["HDL (good)", "60 mg/dL", "✓"], ["LDL", "96 mg/dL", "✓"], ["Triglycerides", "71 mg/dL", "✓"], ["SGOT / SGPT", "21 / 19 U/L", "✓"], ["Creatinine", "0.55 mg/dL", "✓"], ["Uric Acid", "4.1 mg/dL", "✓"], ["Calcium", "9.6 mg/dL", "✓"], ["FT3 / FT4", "3.07 / 1.22", "✓"], ["Platelets", "267K", "✓"]].map(function(row, i) {
                 return (
                   <div key={i} className="health-row">
                     <span className="health-name">{row[0]}</span>
@@ -489,17 +489,17 @@ export default function App() {
 
         {tab === "tips" && (
           <div className="fade-in">
-            <h3 className="section-title">Wellness Playbook \u2728</h3>
+            <h3 className="section-title">Wellness Playbook ✨</h3>
             <p className="hint" style={{ marginBottom: 20 }}>Personalized for you, based on your report + lifestyle</p>
             {[
-              { e: "\u2600\ufe0f", t: "Morning Sunlight", d: "20-30 min before 10 AM. No sunscreen on arms. Most important for Vitamin D.", tag: "vitamin d" },
-              { e: "\ud83d\udeb6\u200d\u2640\ufe0f", t: "Walk After Every Meal", d: "10-15 min post-meal walks. Put on Fred Again or Harry Styles and go.", tag: "fitness" },
-              { e: "\ud83c\udf73", t: "Protein at Every Meal", d: "Aim for 60-70g daily. Eggs, dal, paneer, chicken, curd.", tag: "nutrition" },
-              { e: "\ud83e\udec1", t: "Breathe When Stressed", d: "Your hs-CRP is elevated. Stress makes inflammation worse. Use 4-7-8.", tag: "mental health" },
-              { e: "\ud83d\udc83", t: "Dance > Stress Eating", d: "When you want chips, dance for 5 minutes instead!", tag: "de-stress" },
-              { e: "\ud83c\udf75", t: "No Chai With Iron", d: "Tea blocks iron absorption. Take iron with nimbu pani. Wait 2 hrs.", tag: "supplements" },
-              { e: "\ud83c\udf19", t: "Sleep by 11 PM", d: "Your borderline TSH needs good sleep. Screen off by 10:30.", tag: "lifestyle" },
-              { e: "\ud83e\uddc3\u200d\ud83c\udf73", t: "Sunday Meal Prep", d: "You love cooking! Batch-cook healthy meals on Sundays.", tag: "nutrition" },
+              { e: "☀️", t: "Morning Sunlight", d: "20-30 min before 10 AM. No sunscreen on arms. Most important for Vitamin D.", tag: "vitamin d" },
+              { e: "🚶‍♀️", t: "Walk After Every Meal", d: "10-15 min post-meal walks. Put on Fred Again or Harry Styles and go.", tag: "fitness" },
+              { e: "🍳", t: "Protein at Every Meal", d: "Aim for 60-70g daily. Eggs, dal, paneer, chicken, curd.", tag: "nutrition" },
+              { e: "🫁", t: "Breathe When Stressed", d: "Your hs-CRP is elevated. Stress makes inflammation worse. Use 4-7-8.", tag: "mental health" },
+              { e: "💃", t: "Dance > Stress Eating", d: "When you want chips, dance for 5 minutes instead!", tag: "de-stress" },
+              { e: "🍵", t: "No Chai With Iron", d: "Tea blocks iron absorption. Take iron with nimbu pani. Wait 2 hrs.", tag: "supplements" },
+              { e: "🌙", t: "Sleep by 11 PM", d: "Your borderline TSH needs good sleep. Screen off by 10:30.", tag: "lifestyle" },
+              { e: "🧃‍🍳", t: "Sunday Meal Prep", d: "You love cooking! Batch-cook healthy meals on Sundays.", tag: "nutrition" },
             ].map(function(tip, i) {
               return (
                 <div key={i} className="tip-card" style={{ animationDelay: (i * 0.05) + "s" }}>
@@ -518,7 +518,7 @@ export default function App() {
       </main>
 
       <nav className="bottom-nav">
-        {[["home", "\ud83c\udfe0", "Home"], ["health", "\ud83e\ude7a", "Health"], ["tips", "\u2728", "Tips"]].map(function(t) {
+        {[["home", "🏠", "Home"], ["health", "🩺", "Health"], ["tips", "✨", "Tips"]].map(function(t) {
           return (
             <button key={t[0]} className={"nav-btn" + (tab === t[0] ? " nav-active" : "")} onClick={function() { setTab(t[0]); }}>
               <span className="nav-icon">{t[1]}</span>
