@@ -130,6 +130,7 @@ const SUPPS = [
   { name: "Vitamin B12", when: "Morning · Daily", emoji: "💊", tip: "Your B12 is 286 — low-normal. Keep supplementing." },
   { name: "Iron + Vitamin C", when: "Afternoon · Daily", emoji: "🩸", tip: "Take with nimbu pani. NO chai for 2 hrs after!" },
   { name: "Omega-3 Fish Oil", when: "Dinner · Daily", emoji: "🐟", tip: "Fights inflammation — your CRP needs this." },
+  { name: "Magnesium", when: "Night · Daily", emoji: "🌙", tip: "Helps sleep, reduces stress, supports thyroid. Take before bed." },
 ];
 
 const QUOTES = [
@@ -143,6 +144,34 @@ const QUOTES = [
 
 var pick = function(a) { return a[Math.floor(Math.random() * a.length)]; };
 var shuffle = function(a) { return a.slice().sort(function() { return Math.random() - 0.5; }); };
+
+
+/* ─── Vitamin D Progress Meter ─── */
+function VitDMeter(props) {
+  var weeks = props.weeks;
+  var total = 12; // 12 week treatment course
+  var pct = Math.min((weeks / total) * 100, 100);
+  var color = pct < 30 ? "#D44" : pct < 60 ? "#D4930D" : pct < 85 ? "#8BAD6A" : "#4A8B3A";
+  var label = pct < 30 ? "Deficient" : pct < 60 ? "Getting there" : pct < 85 ? "Almost!" : "On track! 🌟";
+
+  return (
+    <div className="vitd-meter">
+      <div className="vitd-header">
+        <span style={{ fontSize: 13, fontWeight: 600, color: "#2A2A2A" }}>☀️ Vitamin D Recovery</span>
+        <span style={{ fontSize: 11, color: "#6B6B6B" }}>{weeks}/{total} weeks</span>
+      </div>
+      <div className="vitd-track">
+        <div className="vitd-fill" style={{ width: pct + "%", background: "linear-gradient(90deg, #D44, #D4930D, #8BAD6A, #4A8B3A)", transition: "width 1s cubic-bezier(0.34, 1.56, 0.64, 1)" }} />
+        <div className="vitd-thumb" style={{ left: "calc(" + pct + "% - 8px)", transition: "left 1s cubic-bezier(0.34, 1.56, 0.64, 1)" }} />
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
+        <span style={{ fontSize: 10, color: "#D44" }}>32.5</span>
+        <span style={{ fontSize: 11, fontWeight: 600, color: color }}>{label}</span>
+        <span style={{ fontSize: 10, color: "#4A8B3A" }}>75+</span>
+      </div>
+    </div>
+  );
+}
 
 /* ─── Bunny Tip (AI) ─── */
 function BunnyTip() {
@@ -401,8 +430,13 @@ export default function App() {
   var _s5 = useState(false); var showBreathe = _s5[0]; var setShowBreathe = _s5[1];
   var _s6 = useState(false); var showMeal = _s6[0]; var setShowMeal = _s6[1];
   var _s7 = useState(false); var showChips = _s7[0]; var setShowChips = _s7[1];
+  var _s7b = useState(false); var showVitdAnim = _s7b[0]; var setShowVitdAnim = _s7b[1];
   var _s8 = useState(null); var toast = _s8[0]; var setToast = _s8[1];
   var _s9 = useState(false); var loaded = _s9[0]; var setLoaded = _s9[1];
+  var _s10 = useState(function() {
+    var saved = localStorage.getItem("rw_vitd_doses");
+    return saved ? parseInt(saved) : 0;
+  }); var vitdDoses = _s10[0]; var setVitdDoses = _s10[1];
 
   useEffect(function() { setTimeout(function() { setLoaded(true); }, 100); }, []);
 
@@ -420,7 +454,20 @@ export default function App() {
   }, [meals]);
 
   var flash = function(msg) { setToast(msg); setTimeout(function() { setToast(null); }, 6000); };
-  var toggleSupp = function(i) { setSupps(function(p) { return p.map(function(s, idx) { return idx === i ? Object.assign({}, s, { done: !s.done }) : s; }); }); };
+  var toggleSupp = function(i) {
+    setSupps(function(p) {
+      var updated = p.map(function(s, idx) { return idx === i ? Object.assign({}, s, { done: !s.done }) : s; });
+      // Track Vitamin D doses (first supplement, index 0)
+      if (i === 0 && !p[0].done) {
+        var newDoses = vitdDoses + 1;
+        setVitdDoses(newDoses);
+        localStorage.setItem("rw_vitd_doses", String(newDoses));
+        setShowVitdAnim(true);
+        setTimeout(function() { setShowVitdAnim(false); }, 2000);
+      }
+      return updated;
+    });
+  };
 
   var logMeal = function(m) {
     setMeals(function(p) { return p.concat([m]); });
@@ -449,6 +496,7 @@ export default function App() {
       <header className="header">
         <div className="header-top"><span className="header-brand">🌿</span></div>
         <h1 className="header-greeting">{greet}, Radhika</h1>
+        <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 11, margin: "0 0 8px", fontFamily: "'Outfit',sans-serif", letterSpacing: 0.5 }}>{new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</p>
         <p className="header-quote">"{quote[0]}"<br /><span style={{ fontWeight: 400, fontSize: 11 }}>— {quote[1]}</span></p>
       </header>
 
@@ -511,6 +559,9 @@ export default function App() {
               })}
             </div>
 
+            <VitDMeter weeks={Math.min(vitdDoses, 12)} />
+            {showVitdAnim && <div className="toast" style={{ background: "linear-gradient(135deg, #D4930D, #4A8B3A)" }}>☀️ Vitamin D taken! You're {Math.min(Math.round((vitdDoses/12)*100), 100)}% through your recovery! Keep going! 💪</div>}
+
             {meals.length > 0 && (
               <>
                 <h3 className="section-title" style={{ marginTop: 28 }}>Today's Meals 📋</h3>
@@ -535,6 +586,103 @@ export default function App() {
                 })}
               </>
             )}
+          </div>
+        )}
+
+        {tab === "reports" && (
+          <div className="fade-in">
+            <h3 className="section-title">Weekly Report 📊</h3>
+            <p className="hint" style={{ marginBottom: 20 }}>Your progress over the past days</p>
+
+            {(function() {
+              var history = loadHistory("rw_history");
+              var last7 = history.slice(-7);
+
+              if (last7.length === 0) {
+                return (
+                  <div style={{ textAlign: "center", padding: "40px 20px", color: C.stone }}>
+                    <p style={{ fontSize: 40, marginBottom: 12 }}>📊</p>
+                    <p style={{ fontSize: 14 }}>No data yet! Start logging meals and your chart will appear here.</p>
+                  </div>
+                );
+              }
+
+              var maxCal = Math.max.apply(null, last7.map(function(d) { return d.calories || 1; }));
+              var maxP = Math.max.apply(null, last7.map(function(d) { return d.protein || 1; }));
+              var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+              return (
+                <>
+                  {/* Protein Chart */}
+                  <div style={{ background: C.warm, borderRadius: 20, padding: "20px 16px", marginBottom: 16, border: "1px solid " + C.sand }}>
+                    <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: C.charcoal }}>🥚 Daily Protein (g)</p>
+                    <div style={{ display: "flex", alignItems: "flex-end", gap: 6, height: 120 }}>
+                      {last7.map(function(d, i) {
+                        var h = Math.max((d.protein / 70) * 100, 8);
+                        var dayName = days[new Date(d.date).getDay()];
+                        var isGood = d.protein >= 50;
+                        return (
+                          <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                            <span style={{ fontSize: 10, fontWeight: 600, color: isGood ? C.olive : C.burg }}>{d.protein}g</span>
+                            <div style={{ width: "100%", height: h + "%", minHeight: 8, background: isGood ? "linear-gradient(180deg, " + C.olive + ", " + C.oliveMid + ")" : "linear-gradient(180deg, " + C.burg + ", " + C.burgLight + ")", borderRadius: 6, transition: "height 0.5s ease" }} />
+                            <span style={{ fontSize: 9, color: C.mist }}>{dayName}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
+                      <span style={{ fontSize: 10, color: C.mist }}>Target: 60-70g/day</span>
+                      <span style={{ fontSize: 10, color: C.olive }}>Green = 50g+</span>
+                    </div>
+                  </div>
+
+                  {/* Calories Chart */}
+                  <div style={{ background: C.warm, borderRadius: 20, padding: "20px 16px", marginBottom: 16, border: "1px solid " + C.sand }}>
+                    <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: C.charcoal }}>🔥 Daily Calories</p>
+                    <div style={{ display: "flex", alignItems: "flex-end", gap: 6, height: 120 }}>
+                      {last7.map(function(d, i) {
+                        var h = Math.max((d.calories / 2000) * 100, 8);
+                        var dayName = days[new Date(d.date).getDay()];
+                        return (
+                          <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                            <span style={{ fontSize: 10, fontWeight: 600, color: C.burg }}>{d.calories}</span>
+                            <div style={{ width: "100%", height: h + "%", minHeight: 8, background: "linear-gradient(180deg, " + C.burg + ", " + C.burgLight + ")", borderRadius: 6, transition: "height 0.5s ease" }} />
+                            <span style={{ fontSize: 9, color: C.mist }}>{dayName}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Supplements Streak */}
+                  <div style={{ background: C.warm, borderRadius: 20, padding: "20px 16px", marginBottom: 16, border: "1px solid " + C.sand }}>
+                    <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: C.charcoal }}>💊 Supplement Streak</p>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      {last7.map(function(d, i) {
+                        var parts = (d.supplements || "0/5").split("/");
+                        var done = parseInt(parts[0]);
+                        var total = parseInt(parts[1]);
+                        var allDone = done === total;
+                        var dayName = days[new Date(d.date).getDay()];
+                        return (
+                          <div key={i} style={{ flex: 1, textAlign: "center" }}>
+                            <div style={{ width: 32, height: 32, borderRadius: "50%", margin: "0 auto 4px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 600, background: allDone ? C.olive : d.done > 0 ? C.oliveGhost : C.sand, color: allDone ? "#fff" : C.stone }}>
+                              {allDone ? "✓" : done}
+                            </div>
+                            <span style={{ fontSize: 9, color: C.mist }}>{dayName}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Vitamin D Progress */}
+                  <VitDMeter weeks={Math.min(vitdDoses, 12)} />
+                </>
+              );
+            })()}
+
+            <BunnyTip />
           </div>
         )}
 
@@ -613,7 +761,7 @@ export default function App() {
       </main>
 
       <nav className="bottom-nav">
-        {[["home", "🏠", "Home"], ["health", "🩺", "Health"], ["tips", "✨", "Tips"]].map(function(t) {
+        {[["home", "🏠", "Home"], ["reports", "📊", "Reports"], ["health", "🩺", "Health"], ["tips", "✨", "Tips"]].map(function(t) {
           return (
             <button key={t[0]} className={"nav-btn" + (tab === t[0] ? " nav-active" : "")} onClick={function() { setTab(t[0]); }}>
               <span className="nav-icon">{t[1]}</span>
@@ -745,7 +893,7 @@ export default function App() {
         .btn-save{width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;border:none;font-family:'Outfit',sans-serif;background:" + C.burg + ";color:#fff}\
         .btn-save:disabled{background:" + C.sand + ";color:" + C.mist + ";cursor:default}\
         .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:999;background:" + C.olive + ";color:#fff;padding:14px 24px;border-radius:16px;font-size:13px;max-width:360px;text-align:center;white-space:pre-line;box-shadow:0 8px 32px rgba(0,0,0,0.25);animation:slideDown 0.4s ease;line-height:1.5}\
-        @keyframes fadeIn{from{opacity:0}to{opacity:1}}\
+                .vitd-meter{background:#FFFDF8;border-radius:16px;padding:14px 16px;margin-bottom:16px;border:1px solid #E8E4DC}        .vitd-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}        .vitd-track{height:12px;background:#E8E4DC;border-radius:6px;position:relative;overflow:visible}        .vitd-fill{height:100%;border-radius:6px;position:relative}        .vitd-thumb{position:absolute;top:-2px;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #606B4E;box-shadow:0 2px 8px rgba(0,0,0,0.2)}@keyframes fadeIn{from{opacity:0}to{opacity:1}}\
         @keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}\
         @keyframes slideDown{from{transform:translateX(-50%) translateY(-16px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}\
         @keyframes fadeUp{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}\
