@@ -697,7 +697,7 @@ export default function App() {
   var suggestGoalsAI = async function() {
     setGoalsAiLoading(true);
     var suppsDoneCount = supps.filter(function(s) { return s.done; }).length;
-    var prompt = "Suggest 3 small, achievable weekly health goals for Radhika. She has Vitamin D deficiency, elevated inflammation (CRP), borderline thyroid. She takes supplements (D3, B12, Iron, Omega-3, Magnesium). She loves cooking, dancing, Harry Styles, Fred Again. Current supplement streak: " + suppsDoneCount + "/" + supps.length + " today. Goals should be specific with a number target (like 'Walk after meals - 4 times'). Mix health, fun, and food goals. Respond as JSON: {"goals":[{"name":"goal description","target":3},{"name":"goal 2","target":4},{"name":"goal 3","target":2}]}";
+    var prompt = "Suggest 3 small, achievable weekly health goals for Radhika. She has Vitamin D deficiency, elevated inflammation (CRP), borderline thyroid. She takes supplements (D3, B12, Iron, Omega-3, Magnesium). She loves cooking, dancing, Harry Styles, Fred Again. Current supplement streak: " + suppsDoneCount + "/" + supps.length + " today. Goals should be specific with a number target (like 'Walk after meals - 4 times'). Mix health, fun, and food goals. Respond as JSON with keys: goals (array of objects with name and target number).";
     var result = await askAI(prompt);
     if (result && result.goals) {
       setGoalDrafts(result.goals.map(function(g) { return g.name; }));
