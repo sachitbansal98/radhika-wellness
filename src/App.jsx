@@ -12,7 +12,7 @@ const C = {
 const BUNNY_SRC = "/bunny-icon-192.png";
 
 /* ─── AI system prompt ─── */
-const AI_CONTEXT = "You are a fun wellness assistant for Radhika, 26, Indian. Her boyfriend Sachit (Bunny) built this app. Health: Vitamin D deficient (32.51, needs 75+), hs-CRP elevated 5.26, TSH borderline 4.774. Supplements: D3, B12, Iron+C, Omega-3. Loves Harry Styles, Taylor Swift, One Direction, Fred Again, Harry Potter. Loves idli sambhar, chicken biryani, cooking, dancing. Avoid chips/junk. Always respond ONLY with valid JSON. No markdown, no backticks, no preamble.";
+const AI_CONTEXT = "You are a fun wellness assistant for Radhika, 26, Indian. Her boyfriend Sachit (Bunny) built this app. Health: Vitamin D deficient (32.51, needs 75+), hs-CRP elevated 5.26, TSH borderline 4.774. Supplements: D3, B12, Iron+C, Omega-3. Loves Harry Styles, Taylor Swift, One Direction, Fred Again, Harry Potter. Loves idli sambhar, chicken biryani, cooking, dancing. Avoid chips/junk. Never suggest makhana — she hates it. Suggest protein chips, protein shakes, roasted chana instead. Always respond ONLY with valid JSON. No markdown, no backticks, no preamble.";
 
 async function askAI(prompt) {
   try {
@@ -109,18 +109,18 @@ const FALLBACK_TIPS = [
 const FALLBACK_ROASTS = [
   { roast: "Radhika. Put. The chips. DOWN.", sub: "Harry Styles didn't say Treat people with Lays.", emoji: "🚫" },
   { roast: "Expelliarmus those chips!", sub: "10 points from Gryffindor if you eat them.", emoji: "🪄" },
-  { roast: "Bunny made this whole app for you.", sub: "Don't make him sad. Eat makhana instead.", emoji: "🥺" },
+  { roast: "Bunny made this whole app for you.", sub: "Don't make him sad. Have protein chips instead.", emoji: "🥺" },
   { roast: "Taylor would NOT approve.", sub: "Shake off the craving. Choose fruit.", emoji: "🍎" },
 ];
 
 const CHIP_ALTS = [
-  { name: "Roasted Makhana", cal: "90 cal/katori", why: "Light, crunchy, anti-inflammatory", emoji: "🌰" },
+  { name: "Protein Chips", cal: "120 cal/bag", why: "Crunchy, high protein, low guilt", emoji: "💪" },
   { name: "Roasted Chana", cal: "120 cal/katori", why: "High protein, great crunch", emoji: "🪶" },
   { name: "Fruit Chaat", cal: "80 cal/bowl", why: "Vitamins + fiber + natural sugar", emoji: "🍎" },
   { name: "Sprouts Salad", cal: "100 cal/bowl", why: "Protein-packed, refreshing", emoji: "🌱" },
   { name: "Air-popped Popcorn", cal: "95 cal/bowl", why: "Whole grain, satisfying crunch", emoji: "🍿" },
   { name: "Cucumber + Hummus", cal: "70 cal/serving", why: "Hydrating, protein from hummus", emoji: "🥒" },
-  { name: "Roasted Peanuts", cal: "140 cal/handful", why: "Healthy fats, very filling", emoji: "🥜" },
+  { name: "Protein Shake", cal: "150 cal/glass", why: "25g protein, fills you up instantly", emoji: "🥤" },
 ];
 
 const BREATHE_MSGS = ["Hey. Breathe. You're doing amazing. 💚", "Inhale the good stuff, exhale the stress. 🌿", "Close your eyes. You're safe. Let's breathe together. ✨", "As Taylor says — you need to calm down. 🫁"];
@@ -432,6 +432,9 @@ export default function App() {
   var _s7 = useState(false); var showChips = _s7[0]; var setShowChips = _s7[1];
   var _s7b = useState(false); var showVitdAnim = _s7b[0]; var setShowVitdAnim = _s7b[1];
   var _s8 = useState(null); var toast = _s8[0]; var setToast = _s8[1];
+  var _s8b = useState(""); var kitchenQuery = _s8b[0]; var setKitchenQuery = _s8b[1];
+  var _s8c = useState(false); var kitchenLoading = _s8c[0]; var setKitchenLoading = _s8c[1];
+  var _s8d = useState(null); var kitchenRecipe = _s8d[0]; var setKitchenRecipe = _s8d[1];
   var _s9 = useState(false); var loaded = _s9[0]; var setLoaded = _s9[1];
   var _s10 = useState(function() {
     var saved = localStorage.getItem("rw_vitd_doses");
@@ -452,6 +455,18 @@ export default function App() {
     // Archive to history at end of day
     if (meals.length > 0) archiveDay(meals, supps);
   }, [meals]);
+
+  var searchRecipeWith = async function(query) {
+    if (!query.trim()) return;
+    setKitchenLoading(true); setKitchenRecipe(null);
+    var prompt = "Radhika wants to cook: \"" + query + "\". Give her a recipe that's healthy and suits her health (low inflammation, high protein, vitamin D friendly). She loves Indian food. Keep it practical with common Indian kitchen ingredients. Respond as JSON: {\"name\":\"dish name\",\"emoji\":\"one emoji\",\"time\":\"cook time\",\"calories\":number per serving,\"protein\":number grams per serving,\"ingredients\":[\"qty ingredient\"],\"steps\":[\"step 1\",\"step 2\"],\"healthNote\":\"1-2 sentence note about how this helps her health, be funny and reference Bunny or her interests\"}";
+    var result = await askAI(prompt);
+    if (result && result.name) { setKitchenRecipe(result); }
+    else { setKitchenRecipe({ name: "Oops!", emoji: "😅", healthNote: "Couldn't find a recipe. Try something like 'healthy chicken recipe' or 'high protein breakfast'." }); }
+    setKitchenLoading(false);
+  };
+
+  var searchRecipe = function() { searchRecipeWith(kitchenQuery); };
 
   var flash = function(msg) { setToast(msg); setTimeout(function() { setToast(null); }, 6000); };
   var toggleSupp = function(i) {
@@ -686,6 +701,102 @@ export default function App() {
           </div>
         )}
 
+        {tab === "kitchen" && (
+          <div className="fade-in">
+            <h3 className="section-title">Radhika's Kitchen 🧑‍🍳</h3>
+            <p className="hint" style={{ marginBottom: 16 }}>Tell me what you're craving, I'll find you a recipe!</p>
+
+            {/* Search */}
+            <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+              <input
+                value={kitchenQuery}
+                onChange={function(e) { setKitchenQuery(e.target.value); }}
+                onKeyDown={function(e) { if (e.key === "Enter") searchRecipe(); }}
+                placeholder="I want something spicy with chicken..."
+                className="meal-input"
+                disabled={kitchenLoading}
+              />
+              <button onClick={searchRecipe} className="btn-primary" style={{ padding: "0 20px", fontSize: 14 }} disabled={kitchenLoading}>
+                {kitchenLoading ? "⏳" : "🔍"}
+              </button>
+            </div>
+
+            {/* Quick mood buttons */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 20 }}>
+              {["high protein dinner", "quick healthy breakfast", "chicken recipe", "soya chop ideas", "comfort food but healthy", "something sweet but not junk", "easy dal recipe", "low calorie snack"].map(function(q) {
+                return <button key={q} onClick={function() { setKitchenQuery(q); }} className="chip-btn" disabled={kitchenLoading}>{q}</button>;
+              })}
+            </div>
+
+            {kitchenLoading && (
+              <div style={{ textAlign: "center", padding: "30px 0", color: C.olive }}>
+                <p style={{ fontSize: 16 }}>🧑‍🍳 Chef AI is cooking up ideas...</p>
+                <p style={{ fontSize: 11, color: C.mist, marginTop: 4 }}>Finding the perfect recipe for you</p>
+              </div>
+            )}
+
+            {/* Recipe result */}
+            {kitchenRecipe && !kitchenLoading && (
+              <div style={{ background: C.warm, borderRadius: 20, padding: "20px 18px", border: "1px solid " + C.sand, marginBottom: 16 }}>
+                <h4 style={{ fontFamily: "'Lora',serif", fontSize: 18, color: C.charcoal, margin: "0 0 4px" }}>{kitchenRecipe.name} {kitchenRecipe.emoji || "🍽️"}</h4>
+                <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
+                  {kitchenRecipe.time && <span className="tip-tag">⏱️ {kitchenRecipe.time}</span>}
+                  {kitchenRecipe.calories && <span className="tip-tag" style={{ background: C.burgGhost, color: C.burg }}>🔥 {kitchenRecipe.calories} cal</span>}
+                  {kitchenRecipe.protein && <span className="tip-tag">💪 {kitchenRecipe.protein}g protein</span>}
+                </div>
+
+                {kitchenRecipe.ingredients && (
+                  <>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: C.olive, marginBottom: 6 }}>Ingredients</p>
+                    {kitchenRecipe.ingredients.map(function(ing, i) {
+                      return <p key={i} style={{ fontSize: 12.5, color: C.stone, margin: "2px 0", lineHeight: 1.5 }}>• {ing}</p>;
+                    })}
+                  </>
+                )}
+
+                {kitchenRecipe.steps && (
+                  <>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: C.olive, margin: "14px 0 6px" }}>Steps</p>
+                    {kitchenRecipe.steps.map(function(step, i) {
+                      return <p key={i} style={{ fontSize: 12.5, color: C.charcoal, margin: "4px 0", lineHeight: 1.6 }}><strong style={{ color: C.olive }}>{i + 1}.</strong> {step}</p>;
+                    })}
+                  </>
+                )}
+
+                {kitchenRecipe.healthNote && (
+                  <div style={{ background: C.oliveGhost, borderRadius: 12, padding: "10px 14px", marginTop: 14, fontSize: 12, color: C.olive, lineHeight: 1.5 }}>
+                    🤖 {kitchenRecipe.healthNote}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Auto suggestions */}
+            <h3 className="section-title" style={{ marginTop: 8 }}>Radhika's Favourites ❤️</h3>
+            {[
+              { name: "Chicken Biryani (Healthier)", desc: "Your fave but lighter — less oil, more protein, with raita", emoji: "🍗", q: "healthy chicken biryani recipe with less oil" },
+              { name: "Soya Chop", desc: "Crispy outside, protein-packed inside — perfect snack", emoji: "🫘", q: "crispy soya chop recipe" },
+              { name: "Idli Sambhar", desc: "Classic comfort — fermented goodness + protein-rich sambhar", emoji: "🥣", q: "soft idli with protein rich sambhar recipe" },
+              { name: "High Protein Dal", desc: "Moong dal with tadka — easy, quick, 20g+ protein per bowl", emoji: "🥘", q: "high protein moong dal tadka recipe" },
+              { name: "Chicken Tikka", desc: "Tandoori-style in oven — 22g protein per serving, low carb", emoji: "🍢", q: "easy oven chicken tikka recipe" },
+              { name: "Protein Shake Recipes", desc: "Quick shakes with 25g+ protein — chocolate, banana, peanut butter", emoji: "🥤", q: "high protein shake recipe with banana and peanut butter" },
+            ].map(function(fav, i) {
+              return (
+                <button key={i} onClick={function() { setKitchenQuery(fav.q); searchRecipeWith(fav.q); }} className="fav-recipe-card" style={{ animationDelay: (i * 0.05) + "s" }}>
+                  <span style={{ fontSize: 24 }}>{fav.emoji}</span>
+                  <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                    <p style={{ fontSize: 14, fontWeight: 600, margin: 0, color: C.charcoal }}>{fav.name}</p>
+                    <p style={{ fontSize: 11, color: C.stone, margin: "2px 0 0", lineHeight: 1.4 }}>{fav.desc}</p>
+                  </div>
+                  <span style={{ fontSize: 14, color: C.oliveMid }}>→</span>
+                </button>
+              );
+            })}
+
+            <BunnyTip />
+          </div>
+        )}
+
         {tab === "health" && (
           <div className="fade-in">
             <h3 className="section-title">Health Dashboard 🩺</h3>
@@ -761,7 +872,7 @@ export default function App() {
       </main>
 
       <nav className="bottom-nav">
-        {[["home", "🏠", "Home"], ["reports", "📊", "Reports"], ["health", "🩺", "Health"], ["tips", "✨", "Tips"]].map(function(t) {
+        {[["home", "🏠", "Home"], ["reports", "📊", "Reports"], ["kitchen", "🧑‍🍳", "Kitchen"], ["health", "🩺", "Health"], ["tips", "✨", "Tips"]].map(function(t) {
           return (
             <button key={t[0]} className={"nav-btn" + (tab === t[0] ? " nav-active" : "")} onClick={function() { setTab(t[0]); }}>
               <span className="nav-icon">{t[1]}</span>
@@ -848,7 +959,7 @@ export default function App() {
         .tip-desc{font-size:12.5px;color:" + C.stone + ";margin:0 0 8px;line-height:1.5}\
         .tip-tag{font-size:9px;background:" + C.oliveGhost + ";color:" + C.olive + ";padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:0.5px}\
         .bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:430px;width:100%;background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border-top:1px solid " + C.sand + ";display:flex;justify-content:space-around;padding:8px 0 28px;z-index:100}\
-        .nav-btn{background:none;border:none;cursor:pointer;text-align:center;padding:4px 20px;opacity:0.35;transition:all 0.2s}\
+        .nav-btn{background:none;border:none;cursor:pointer;text-align:center;padding:4px 10px;opacity:0.35;transition:all 0.2s}\
         .nav-active{opacity:1}\
         .nav-icon{font-size:20px;display:block}\
         .nav-label{font-size:10px;color:" + C.olive + ";font-weight:600;display:block;margin-top:2px}\
@@ -893,7 +1004,7 @@ export default function App() {
         .btn-save{width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;border:none;font-family:'Outfit',sans-serif;background:" + C.burg + ";color:#fff}\
         .btn-save:disabled{background:" + C.sand + ";color:" + C.mist + ";cursor:default}\
         .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:999;background:" + C.olive + ";color:#fff;padding:14px 24px;border-radius:16px;font-size:13px;max-width:360px;text-align:center;white-space:pre-line;box-shadow:0 8px 32px rgba(0,0,0,0.25);animation:slideDown 0.4s ease;line-height:1.5}\
-                .vitd-meter{background:#FFFDF8;border-radius:16px;padding:14px 16px;margin-bottom:16px;border:1px solid #E8E4DC}        .vitd-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}        .vitd-track{height:12px;background:#E8E4DC;border-radius:6px;position:relative;overflow:visible}        .vitd-fill{height:100%;border-radius:6px;position:relative}        .vitd-thumb{position:absolute;top:-2px;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #606B4E;box-shadow:0 2px 8px rgba(0,0,0,0.2)}@keyframes fadeIn{from{opacity:0}to{opacity:1}}\
+                .vitd-meter{background:#FFFDF8;border-radius:16px;padding:14px 16px;margin-bottom:16px;border:1px solid #E8E4DC}        .vitd-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}        .vitd-track{height:12px;background:#E8E4DC;border-radius:6px;position:relative;overflow:visible}        .vitd-fill{height:100%;border-radius:6px;position:relative}        .vitd-thumb{position:absolute;top:-2px;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #606B4E;box-shadow:0 2px 8px rgba(0,0,0,0.2)}        .fav-recipe-card{display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;background:#FFFDF8;border:1.5px solid #E8E4DC;border-radius:16px;margin-bottom:8px;cursor:pointer;transition:transform 0.15s;animation:fadeUp 0.4s ease both;font-family:'Outfit',sans-serif}        .fav-recipe-card:active{transform:scale(0.98)}@keyframes fadeIn{from{opacity:0}to{opacity:1}}\
         @keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}\
         @keyframes slideDown{from{transform:translateX(-50%) translateY(-16px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}\
         @keyframes fadeUp{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}\
