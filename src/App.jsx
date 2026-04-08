@@ -92,6 +92,58 @@ function archiveDay(meals, supps) {
   saveHistory("rw_history", history);
 }
 
+
+/* ─── period tracker helpers ─── */
+function getCycleInfo(periods) {
+  if (!periods || periods.length === 0) return null;
+  var sorted = periods.slice().sort(function(a, b) { return new Date(b.start) - new Date(a.start); });
+  var last = sorted[0];
+  var lastStart = new Date(last.start);
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+  var daysSinceLast = Math.floor((today - lastStart) / (1000 * 60 * 60 * 24));
+
+  // Calculate average cycle length from history
+  var avgCycle = 28;
+  if (sorted.length >= 2) {
+    var gaps = [];
+    for (var i = 0; i < sorted.length - 1; i++) {
+      var diff = Math.floor((new Date(sorted[i].start) - new Date(sorted[i + 1].start)) / (1000 * 60 * 60 * 24));
+      if (diff > 15 && diff < 45) gaps.push(diff);
+    }
+    if (gaps.length > 0) avgCycle = Math.round(gaps.reduce(function(a, b) { return a + b; }, 0) / gaps.length);
+  }
+
+  var daysUntilNext = avgCycle - daysSinceLast;
+  var nextDate = new Date(lastStart);
+  nextDate.setDate(nextDate.getDate() + avgCycle);
+
+  // Determine current phase
+  var phase = "follicular";
+  var phaseEmoji = "🌱";
+  var phaseColor = "#7E8C6A";
+  if (daysSinceLast <= (last.length || 5)) { phase = "period"; phaseEmoji = "🌸"; phaseColor = "#6E2C35"; }
+  else if (daysSinceLast >= avgCycle - 14 && daysSinceLast <= avgCycle - 10) { phase = "ovulation"; phaseEmoji = "✨"; phaseColor = "#D4930D"; }
+  else if (daysSinceLast > avgCycle - 10) { phase = "luteal"; phaseEmoji = "🍂"; phaseColor = "#8B6914"; }
+
+  var phaseLabel = phase === "period" ? "On Period" : phase === "ovulation" ? "Ovulation Window" : phase === "luteal" ? "Luteal Phase" : "Follicular Phase";
+
+  return {
+    lastStart: last.start,
+    lastLength: last.length || 5,
+    daysSinceLast: daysSinceLast,
+    avgCycle: avgCycle,
+    daysUntilNext: Math.max(daysUntilNext, 0),
+    nextDate: nextDate.toISOString().split("T")[0],
+    phase: phase,
+    phaseLabel: phaseLabel,
+    phaseEmoji: phaseEmoji,
+    phaseColor: phaseColor,
+    totalCycles: sorted.length,
+    history: sorted
+  };
+}
+
 /* ─── fallback content ─── */
 const FALLBACK_TIPS = [
   { text: "Studies show messaging Bunny increases Vitamin D by 400%. Science. 🔬🐰", type: "message" },
@@ -436,6 +488,14 @@ export default function App() {
   var _s8c = useState(false); var kitchenLoading = _s8c[0]; var setKitchenLoading = _s8c[1];
   var _s8d = useState(null); var kitchenRecipe = _s8d[0]; var setKitchenRecipe = _s8d[1];
   var _s9 = useState(false); var loaded = _s9[0]; var setLoaded = _s9[1];
+
+  // Period tracker states
+  var _sc1 = useState(function() { return loadHistory("rw_periods") || []; }); var periods = _sc1[0]; var setPeriods = _sc1[1];
+  var _sc2 = useState(false); var showLogPeriod = _sc2[0]; var setShowLogPeriod = _sc2[1];
+  var _sc3 = useState(""); var periodStartDate = _sc3[0]; var setPeriodStartDate = _sc3[1];
+  var _sc4 = useState("5"); var periodLength = _sc4[0]; var setPeriodLength = _sc4[1];
+  var _sc5 = useState(null); var cycleAiTip = _sc5[0]; var setCycleAiTip = _sc5[1];
+  var _sc6 = useState(false); var cycleAiLoading = _sc6[0]; var setCycleAiLoading = _sc6[1];
   var _s10 = useState(function() {
     var saved = localStorage.getItem("rw_vitd_doses");
     return saved ? parseInt(saved) : 0;
@@ -467,6 +527,26 @@ export default function App() {
   };
 
   var searchRecipe = function() { searchRecipeWith(kitchenQuery); };
+
+  var savePeriod = function() {
+    if (!periodStartDate) return;
+    var entry = { start: periodStartDate, length: parseInt(periodLength) || 5, logged: getTodayKey() };
+    var updated = periods.concat([entry]);
+    setPeriods(updated);
+    saveHistory("rw_periods", updated);
+    setShowLogPeriod(false);
+    setPeriodStartDate("");
+    setPeriodLength("5");
+    flash("🌸 Period logged! Take care of yourself ❤️");
+  };
+
+  var getCycleAiTip = async function(info) {
+    setCycleAiLoading(true);
+    var prompt = "Radhika is in her " + info.phaseLabel + " (day " + info.daysSinceLast + " of cycle, avg cycle " + info.avgCycle + " days). Give her a SHORT (2-3 sentences) personalized tip about what to eat, how to exercise, and how to feel better during this phase. Consider her health: Vitamin D deficient, elevated CRP inflammation, borderline TSH. Be warm, funny, reference Bunny or her interests. Respond as JSON: {\"tip\":\"the tip with emojis\",\"foods\":[\"food1\",\"food2\",\"food3\"],\"avoid\":[\"thing1\",\"thing2\"]}";
+    var result = await askAI(prompt);
+    if (result) setCycleAiTip(result);
+    setCycleAiLoading(false);
+  };
 
   var flash = function(msg) { setToast(msg); setTimeout(function() { setToast(null); }, 6000); };
   var toggleSupp = function(i) {
@@ -797,6 +877,161 @@ export default function App() {
           </div>
         )}
 
+        {tab === "cycle" && (
+          <div className="fade-in">
+            <h3 className="section-title">Cycle Tracker 🌸</h3>
+
+            {(function() {
+              var info = getCycleInfo(periods);
+
+              if (!info) {
+                return (
+                  <div style={{ textAlign: "center", padding: "40px 20px" }}>
+                    <p style={{ fontSize: 48, marginBottom: 12 }}>🌸</p>
+                    <p style={{ fontSize: 15, color: C.charcoal, fontWeight: 600, marginBottom: 8 }}>No periods logged yet</p>
+                    <p style={{ fontSize: 12, color: C.stone, marginBottom: 20 }}>Log your last period to start tracking your cycle</p>
+                    <button onClick={function() { setShowLogPeriod(true); }} className="btn-primary">Log Period 🌸</button>
+                  </div>
+                );
+              }
+
+              return (
+                <>
+                  {/* Current Phase Card */}
+                  <div style={{ background: "linear-gradient(140deg, " + info.phaseColor + ", " + info.phaseColor + "CC)", borderRadius: 20, padding: "24px 20px", marginBottom: 16, color: "#fff" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                      <div>
+                        <p style={{ fontSize: 12, opacity: 0.8, margin: 0 }}>Current Phase</p>
+                        <p style={{ fontSize: 22, fontFamily: "'Lora',serif", fontWeight: 600, margin: "4px 0 0" }}>{info.phaseEmoji} {info.phaseLabel}</p>
+                      </div>
+                      <div style={{ textAlign: "right" }}>
+                        <p style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>Day {info.daysSinceLast}</p>
+                        <p style={{ fontSize: 11, opacity: 0.8, margin: 0 }}>of ~{info.avgCycle} day cycle</p>
+                      </div>
+                    </div>
+
+                    {/* Cycle progress bar */}
+                    <div style={{ background: "rgba(255,255,255,0.2)", borderRadius: 8, height: 8, marginBottom: 8, overflow: "hidden" }}>
+                      <div style={{ height: "100%", borderRadius: 8, background: "rgba(255,255,255,0.7)", width: Math.min((info.daysSinceLast / info.avgCycle) * 100, 100) + "%", transition: "width 0.5s ease" }} />
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, opacity: 0.7 }}>
+                      <span>Period</span>
+                      <span>Follicular</span>
+                      <span>Ovulation</span>
+                      <span>Luteal</span>
+                    </div>
+                  </div>
+
+                  {/* Prediction Card */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
+                    <div style={{ background: C.warm, borderRadius: 16, padding: "16px 14px", border: "1px solid " + C.sand, textAlign: "center" }}>
+                      <p style={{ fontSize: 24, fontWeight: 700, color: C.burg, margin: 0 }}>{info.daysUntilNext}</p>
+                      <p style={{ fontSize: 11, color: C.stone, margin: "4px 0 0" }}>days until next period</p>
+                    </div>
+                    <div style={{ background: C.warm, borderRadius: 16, padding: "16px 14px", border: "1px solid " + C.sand, textAlign: "center" }}>
+                      <p style={{ fontSize: 14, fontWeight: 600, color: C.olive, margin: 0 }}>{new Date(info.nextDate).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</p>
+                      <p style={{ fontSize: 11, color: C.stone, margin: "4px 0 0" }}>predicted next date</p>
+                    </div>
+                  </div>
+
+                  {/* AI phase tip */}
+                  <div style={{ background: C.oliveGhost, borderRadius: 16, padding: "16px", marginBottom: 16, border: "1px dashed " + C.olivePale }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: C.olive }}>🤖 AI Tips for {info.phaseLabel}</span>
+                      <button onClick={function() { getCycleAiTip(info); }} className="bunny-refresh" disabled={cycleAiLoading}>{cycleAiLoading ? "⏳" : "↻"}</button>
+                    </div>
+                    {cycleAiLoading ? (
+                      <p style={{ fontSize: 12, color: C.stone }}>Generating personalized tips...</p>
+                    ) : cycleAiTip ? (
+                      <>
+                        <p style={{ fontSize: 13, color: C.charcoal, lineHeight: 1.6, marginBottom: 10 }}>{cycleAiTip.tip}</p>
+                        {cycleAiTip.foods && (
+                          <div style={{ marginBottom: 6 }}>
+                            <span style={{ fontSize: 11, fontWeight: 600, color: C.olive }}>Eat: </span>
+                            {cycleAiTip.foods.map(function(f, i) { return <span key={i} className="tip-tag" style={{ marginRight: 4, marginBottom: 4, display: "inline-block" }}>{f}</span>; })}
+                          </div>
+                        )}
+                        {cycleAiTip.avoid && (
+                          <div>
+                            <span style={{ fontSize: 11, fontWeight: 600, color: C.burg }}>Avoid: </span>
+                            {cycleAiTip.avoid.map(function(f, i) { return <span key={i} className="tip-tag" style={{ background: C.burgGhost, color: C.burg, marginRight: 4, marginBottom: 4, display: "inline-block" }}>{f}</span>; })}
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <p style={{ fontSize: 12, color: C.stone }}>Tap ↻ to get AI tips for your current phase</p>
+                    )}
+                  </div>
+
+                  {/* Phase Guide */}
+                  <h3 className="section-title">Cycle Phases Guide 📖</h3>
+                  {[
+                    { emoji: "🌸", name: "Period (Day 1-5)", desc: "Rest more, eat iron-rich foods (spinach, dal, eggs). Light walks only. Your body is shedding — be gentle.", color: C.burg },
+                    { emoji: "🌱", name: "Follicular (Day 6-13)", desc: "Energy is rising! Great time for workouts, cooking experiments, and being social. Protein up!", color: C.olive },
+                    { emoji: "✨", name: "Ovulation (Day 14-16)", desc: "Peak energy and mood. Best time for intense workouts and social plans. You'll feel amazing.", color: "#D4930D" },
+                    { emoji: "🍂", name: "Luteal (Day 17-28)", desc: "Energy dips. Cravings hit. More rest, magnesium-rich foods, gentle exercise. Don't stress about cravings.", color: "#8B6914" },
+                  ].map(function(p, i) {
+                    var isActive = (p.name.toLowerCase().indexOf(info.phase) !== -1) || (info.phase === "period" && i === 0) || (info.phase === "follicular" && i === 1) || (info.phase === "ovulation" && i === 2) || (info.phase === "luteal" && i === 3);
+                    return (
+                      <div key={i} style={{ background: isActive ? p.color + "11" : C.warm, borderRadius: 16, padding: "14px 16px", marginBottom: 8, border: isActive ? "2px solid " + p.color : "1px solid " + C.sand }}>
+                        <p style={{ fontSize: 14, fontWeight: 600, margin: "0 0 4px", color: p.color }}>{p.emoji} {p.name} {isActive ? " ← You're here" : ""}</p>
+                        <p style={{ fontSize: 12, color: C.stone, margin: 0, lineHeight: 1.5 }}>{p.desc}</p>
+                      </div>
+                    );
+                  })}
+
+                  {/* History */}
+                  <h3 className="section-title" style={{ marginTop: 20 }}>Past Periods 📅</h3>
+                  {info.history.slice(0, 6).map(function(p, i) {
+                    var startD = new Date(p.start);
+                    return (
+                      <div key={i} className="health-row">
+                        <span className="health-name">{startD.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
+                        <span className="health-val">{p.length} days</span>
+                      </div>
+                    );
+                  })}
+
+                  <button onClick={function() { setShowLogPeriod(true); }} className="btn-primary" style={{ width: "100%", marginTop: 16 }}>Log New Period 🌸</button>
+                </>
+              );
+            })()}
+
+            {/* Log Period Modal */}
+            {showLogPeriod && (
+              <div className="overlay">
+                <div style={{ background: C.cream, borderRadius: 28, padding: "32px 24px", maxWidth: 340, width: "90%", textAlign: "center" }}>
+                  <p style={{ fontFamily: "'Lora',serif", fontSize: 20, color: C.burg, marginBottom: 4 }}>Log Period 🌸</p>
+                  <p style={{ fontSize: 12, color: C.stone, marginBottom: 20 }}>When did your last period start?</p>
+
+                  <div style={{ marginBottom: 16, textAlign: "left" }}>
+                    <label style={{ fontSize: 12, color: C.stone, display: "block", marginBottom: 4 }}>Start Date</label>
+                    <input type="date" value={periodStartDate} onChange={function(e) { setPeriodStartDate(e.target.value); }}
+                      style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1.5px solid " + C.sand, fontSize: 14, fontFamily: "'Outfit',sans-serif", background: C.warm, outline: "none" }} />
+                  </div>
+
+                  <div style={{ marginBottom: 20, textAlign: "left" }}>
+                    <label style={{ fontSize: 12, color: C.stone, display: "block", marginBottom: 4 }}>How many days did it last?</label>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      {["3", "4", "5", "6", "7"].map(function(d) {
+                        return (
+                          <button key={d} onClick={function() { setPeriodLength(d); }}
+                            style={{ flex: 1, padding: "10px 0", borderRadius: 10, border: periodLength === d ? "2px solid " + C.burg : "1px solid " + C.sand, background: periodLength === d ? C.burgGhost : C.warm, color: periodLength === d ? C.burg : C.stone, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
+                            {d}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <button onClick={savePeriod} disabled={!periodStartDate} className="btn-primary" style={{ width: "100%", marginBottom: 8, background: periodStartDate ? C.burg : C.sand }}>Save 🌸</button>
+                  <button onClick={function() { setShowLogPeriod(false); }} className="btn-ghost">Cancel</button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {tab === "health" && (
           <div className="fade-in">
             <h3 className="section-title">Health Dashboard 🩺</h3>
@@ -816,6 +1051,28 @@ export default function App() {
                 );
               })}
             </div>
+            {/* Wellness Tips */}
+            <h3 className="section-title" style={{ marginTop: 28 }}>Wellness Tips ✨</h3>
+            {[
+              { e: "☀️", t: "Morning Sunlight", d: "20-30 min before 10 AM. No sunscreen on arms. Most important for Vitamin D." },
+              { e: "🚶‍♀️", t: "Walk After Every Meal", d: "10-15 min post-meal walks. Put on Fred Again or Harry Styles and go." },
+              { e: "🍳", t: "Protein at Every Meal", d: "Aim for 60-70g daily. Eggs, dal, paneer, chicken, curd." },
+              { e: "🫁", t: "Breathe When Stressed", d: "Your hs-CRP is elevated. Stress makes inflammation worse. Use 4-7-8." },
+              { e: "💃", t: "Dance > Stress Eating", d: "When you want chips, dance for 5 minutes instead!" },
+              { e: "🍵", t: "No Chai With Iron", d: "Tea blocks iron absorption. Take iron with nimbu pani. Wait 2 hrs." },
+              { e: "🌙", t: "Sleep by 11 PM", d: "Your borderline TSH needs good sleep. Screen off by 10:30." },
+            ].map(function(tip, i) {
+              return (
+                <div key={i} className="tip-card" style={{ animationDelay: (i * 0.05) + "s" }}>
+                  <span className="tip-emoji">{tip.e}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p className="tip-title">{tip.t}</p>
+                    <p className="tip-desc">{tip.d}</p>
+                  </div>
+                </div>
+              );
+            })}
+
             <BunnyTip />
 
             {/* History */}
@@ -841,38 +1098,11 @@ export default function App() {
           </div>
         )}
 
-        {tab === "tips" && (
-          <div className="fade-in">
-            <h3 className="section-title">Wellness Playbook ✨</h3>
-            <p className="hint" style={{ marginBottom: 20 }}>Personalized for you, based on your report + lifestyle</p>
-            {[
-              { e: "☀️", t: "Morning Sunlight", d: "20-30 min before 10 AM. No sunscreen on arms. Most important for Vitamin D.", tag: "vitamin d" },
-              { e: "🚶‍♀️", t: "Walk After Every Meal", d: "10-15 min post-meal walks. Put on Fred Again or Harry Styles and go.", tag: "fitness" },
-              { e: "🍳", t: "Protein at Every Meal", d: "Aim for 60-70g daily. Eggs, dal, paneer, chicken, curd.", tag: "nutrition" },
-              { e: "🫁", t: "Breathe When Stressed", d: "Your hs-CRP is elevated. Stress makes inflammation worse. Use 4-7-8.", tag: "mental health" },
-              { e: "💃", t: "Dance > Stress Eating", d: "When you want chips, dance for 5 minutes instead!", tag: "de-stress" },
-              { e: "🍵", t: "No Chai With Iron", d: "Tea blocks iron absorption. Take iron with nimbu pani. Wait 2 hrs.", tag: "supplements" },
-              { e: "🌙", t: "Sleep by 11 PM", d: "Your borderline TSH needs good sleep. Screen off by 10:30.", tag: "lifestyle" },
-              { e: "🧃‍🍳", t: "Sunday Meal Prep", d: "You love cooking! Batch-cook healthy meals on Sundays.", tag: "nutrition" },
-            ].map(function(tip, i) {
-              return (
-                <div key={i} className="tip-card" style={{ animationDelay: (i * 0.05) + "s" }}>
-                  <span className="tip-emoji">{tip.e}</span>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p className="tip-title">{tip.t}</p>
-                    <p className="tip-desc">{tip.d}</p>
-                    <span className="tip-tag">{tip.tag}</span>
-                  </div>
-                </div>
-              );
-            })}
-            <BunnyTip />
-          </div>
-        )}
+        
       </main>
 
       <nav className="bottom-nav">
-        {[["home", "🏠", "Home"], ["reports", "📊", "Reports"], ["kitchen", "🧑‍🍳", "Kitchen"], ["health", "🩺", "Health"], ["tips", "✨", "Tips"]].map(function(t) {
+        {[["home", "🏠", "Home"], ["reports", "📊", "Reports"], ["kitchen", "🧑‍🍳", "Kitchen"], ["cycle", "🌸", "Cycle"], ["health", "🩺", "Health"]].map(function(t) {
           return (
             <button key={t[0]} className={"nav-btn" + (tab === t[0] ? " nav-active" : "")} onClick={function() { setTab(t[0]); }}>
               <span className="nav-icon">{t[1]}</span>
