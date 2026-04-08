@@ -144,26 +144,144 @@ function getCycleInfo(periods) {
   };
 }
 
+
+/* ─── weekly goals helpers ─── */
+function getWeekKey() {
+  var now = new Date();
+  var day = now.getDay();
+  var diff = now.getDate() - day + (day === 0 ? -6 : 1); // Monday
+  var monday = new Date(now.setDate(diff));
+  return monday.toISOString().split("T")[0];
+}
+
+function loadWeeklyGoals() {
+  try {
+    var stored = localStorage.getItem("rw_goals");
+    if (!stored) return null;
+    var data = JSON.parse(stored);
+    if (data.week !== getWeekKey()) {
+      // Archive old week
+      var history = loadHistory("rw_goals_history");
+      if (data.goals && data.goals.length > 0) {
+        history.push({ week: data.week, goals: data.goals });
+        if (history.length > 12) history = history.slice(-12);
+        saveHistory("rw_goals_history", history);
+      }
+      return null;
+    }
+    return data.goals;
+  } catch(e) { return null; }
+}
+
+function saveWeeklyGoals(goals) {
+  try {
+    localStorage.setItem("rw_goals", JSON.stringify({ week: getWeekKey(), goals: goals }));
+  } catch(e) {}
+}
+
 /* ─── fallback content ─── */
-const FALLBACK_TIPS = [
-  { text: "Studies show messaging Bunny increases Vitamin D by 400%. Science. 🔬🐰", type: "message" },
+const BUNNY_TIPS = [
+  // Call Bunny
+  { text: "Studies show messaging Bunny increases Vitamin D by 400%. Science. 🔬🐰", type: "call" },
   { text: "Your hs-CRP is high. Calling Bunny lowers inflammation. Peer-reviewed. 📞🐰", type: "call" },
+  { text: "Dumbledore had Fawkes. You have Bunny. Call him when stressed. 🐰🔥", type: "call" },
+  { text: "One Direction broke up but Bunny didn't. He's right here. Call him. 📞🐰", type: "call" },
+  { text: "Studies from the University of Bunny confirm: 1 phone call = 10,000 steps of happiness. 📞✨", type: "call" },
+  { text: "Your cortisol levels are high. The cure? A 5-minute call with Bunny. Trust the science. 🧪📞", type: "call" },
+  { text: "Harry Styles has a stylist. Taylor has a team. You have Bunny. Call your support system. 📞💚", type: "call" },
+  { text: "Bunny is probably thinking about you right now. Might as well call and confirm. 📞🐰", type: "call" },
+  { text: "Your phone is right there. Bunny is right there. The math is simple. Call him. 🐰📱", type: "call" },
+  { text: "According to WebMD, not calling Bunny causes vitamin deficiency. Okay I made that up. But still call. 📞", type: "call" },
+
+  // Message Bunny
+  { text: "Sending Bunny a selfie burns approximately 3 calories. It's basically cardio. 📸🐰", type: "message" },
+  { text: "Replying to Bunny's texts has been clinically proven to reduce cortisol. Don't argue with science. 🧪", type: "message" },
+  { text: "Your serotonin called. It said 'text Bunny back'. I'm just the messenger. 💬🐰", type: "message" },
+  { text: "Every unread message from Bunny is a missed opportunity for dopamine. Reply now. 💬✨", type: "message" },
+  { text: "Taylor Swift writes love letters. You can at least text Bunny 'hi'. 💬🐰", type: "message" },
+  { text: "Fun fact: The average Bunny text contains 47% more love than regular texts. Reply rate: needed. 📱💚", type: "message" },
+  { text: "NASA's latest finding: Bunny's texts travel at the speed of love. Open them. 🚀💬", type: "message" },
+  { text: "Your phone notifications are 60% Bunny. That's called dedication. Respond to it. 📱🐰", type: "message" },
+
+  // Food roasts
   { text: "Put the Maggi down. Bunny didn't build this app for 310 calories of sadness. 🍜🚫", type: "food" },
+  { text: "Jalebi is not a food group, Radhika. We've discussed this. 🍯🚫", type: "food" },
+  { text: "Fun fact: Every time you skip chips, an angel gets its wings. And Bunny gets less stressed. 😇", type: "food" },
+  { text: "Reminder: Bunny worries when you don't eat protein. Don't make Bunny worry. 🐰🍳", type: "food" },
+  { text: "Hot take: Dal chawal > chips. This is not up for debate. 🍛✅", type: "food" },
+  { text: "Eating chole bhature for the 3rd time this week? Your CRP just fainted. 📊😵", type: "food" },
+  { text: "Your protein intake called. It said it's lonely. Please eat an egg. 🍳😢", type: "food" },
+  { text: "Breaking news: Local woman chooses salad over chips. Bunny files report of extreme pride. 📰🐰", type: "food" },
+  { text: "If Harry Styles saw you eating chips at 2 AM he'd be disappointed. Eat fruit. 🍎", type: "food" },
+  { text: "Biryani is love. But biryani every day is inflammation. Balance, Radhika. ⚖️🍗", type: "food" },
+  { text: "Your stomach: I want chips. Your blood report: Absolutely not. Listen to the blood report. 📋", type: "food" },
+  { text: "Dumbledore ate in the Great Hall, not at the vending machine. Choose wisely. 🏰🍽️", type: "food" },
+  { text: "Protein shake > sad packet of chips. One builds muscle, the other builds regret. 🥤💪", type: "food" },
+  { text: "Your iron supplement wants to be friends with some dal. Introduce them. 🩸🤝🥘", type: "food" },
+  { text: "Plot twist: Curd rice is actually comfort food AND healthy. Mind blown. 🍚✨", type: "food" },
+
+  // Health
   { text: "Harry Styles walks after meals. Taylor Swift walks after meals. You should too. 🚶‍♀️", type: "health" },
   { text: "Your thyroid called. It said sleep by 11 PM or it's filing a complaint. 📋😤", type: "health" },
-  { text: "Jalebi is not a food group, Radhika. We've discussed this. 🍯🚫", type: "food" },
   { text: "Fred Again didn't make bangers for you to listen sitting down. Dance! 💃🎧", type: "health" },
-  { text: "NASA says your Vitamin D levels are so low they can see it from space. ☀️🛸", type: "health" },
-  { text: "One Direction broke up but Bunny didn't. Call him. 📞🐰", type: "call" },
+  { text: "NASA says your Vitamin D levels are so low they can see it from space. Go outside. ☀️🛸", type: "health" },
   { text: "Expecto Patronum only works if you've taken your Vitamin D. Look it up. 🪄☀️", type: "health" },
-];
+  { text: "Taylor wrote 'All Too Well' in 10 minutes. You can take your supplements in 10 seconds. 💊⏱️", type: "health" },
+  { text: "Your Vitamin D said please go outside. The sun misses you. ☀️😢", type: "health" },
+  { text: "You haven't drunk water in a while. Your kidneys are sending a formal request. 💧📝", type: "health" },
+  { text: "Your iron supplement is lonely. It's been waiting since afternoon. Don't ghost it. 🩸💔", type: "health" },
+  { text: "Sleep is the best skincare, anti-inflammatory, and mood booster. It's free. Use it. 🌙", type: "health" },
+  { text: "10 minutes of sunlight = free Vitamin D. The sun is literally giving you free medicine. ☀️💊", type: "health" },
+  { text: "Your CRP is 5.26. The goal is under 1. Omega-3, sleep, and less stress. You've got this. 💪", type: "health" },
+  { text: "Walking after meals is the most underrated health hack. 10 minutes. Just do it. 🚶‍♀️✨", type: "health" },
+  { text: "Drinking water is not a personality trait but it should be. Go drink some. 💧", type: "health" },
+  { text: "Your TSH is watching. Every hour of good sleep before midnight counts double. 🌙📊", type: "health" },
+  { text: "Stretching for 5 minutes > scrolling for 30 minutes. Your body will thank you. 🧘‍♀️", type: "health" },
+  { text: "Deep breaths don't just feel good — they literally lower your inflammation markers. 🫁📉", type: "health" },
+  { text: "Morning sunlight before 10 AM is like a software update for your body. Install it. ☀️💻", type: "health" },
+  { text: "Your omega-3 is the bouncer that kicks inflammation out of the club. Take it tonight. 🐟🎪", type: "health" },
+  { text: "One day your Vitamin D will be at 75 and you'll look back at 32 and laugh. Keep going. ☀️📈", type: "health" },
+  { text: "Harry Potter survived Voldemort. You can survive taking 5 supplements. 🪄💊", type: "health" },
+  { text: "Ron Weasley ate every meal at Hogwarts. But he also moved a lot. Walk after eating. 🏰🚶‍♀️", type: "health" },
+  { text: "Taylor Swift walks 10,000 steps during her concerts. Your post-meal walk is nothing. Go. 👟", type: "health" },
+  { text: "Fred Again probably drinks water between sets. You should drink water between meals. 💧🎧", type: "health" },
+  { text: "Your magnesium before bed is like a lullaby for your nervous system. Take it. 🌙😴", type: "health" },
+  { text: "Stress eating at 11 PM won't solve the stress. But breathing for 2 minutes might. 🫁✨", type: "health" },
+  { text: "Your B12 is at 286. Not bad, not great. Like a Hogwarts grade of Acceptable. Aim for Outstanding. 💊📊", type: "health" },
+  { text: "Every supplement you take is a tiny soldier fighting for your health. Deploy them daily. 💊⚔️", type: "health" },
+  { text: "Your body is doing its best with what you give it. Give it sunlight, protein, and water today. ☀️🍳💧", type: "health" },
+  { text: "Hermione would've had a supplement schedule on a color-coded chart. Channel that energy. 📊🪄", type: "health" },
+  { text: "You're literally getting healthier every day you use this app. Bunny sees you trying. 🐰💚", type: "health" },
+  { text: "Some people count sheep to sleep. You should count supplements taken today. 💊🐑", type: "health" },
+  { text: "The sorting hat would put your CRP in Slytherin. Let's get it to Gryffindor. 🎩📉", type: "health" },
+  { text: "Niall Horan once said 'just do it'. Wait, that was Nike. Either way — take your Vitamin D. ☀️💊", type: "health" },
+  { text: "Your body after supplements: 📈. Your body after chips: 📉. Choose wisely today. 🤔", type: "health" },
+  { text: "Louis Tomlinson didn't give up on his dreams. Don't give up on your Vitamin D recovery. ☀️💪", type: "health" },
+  { text: "Dance like nobody's watching. But also like your CRP levels depend on it. Because they do. 💃📊", type: "health" },
+]
 
-const FALLBACK_ROASTS = [
+const CHIP_ROASTS_LIST = [
   { roast: "Radhika. Put. The chips. DOWN.", sub: "Harry Styles didn't say Treat people with Lays.", emoji: "🚫" },
   { roast: "Expelliarmus those chips!", sub: "10 points from Gryffindor if you eat them.", emoji: "🪄" },
   { roast: "Bunny made this whole app for you.", sub: "Don't make him sad. Have protein chips instead.", emoji: "🥺" },
   { roast: "Taylor would NOT approve.", sub: "Shake off the craving. Choose fruit.", emoji: "🍎" },
-];
+  { roast: "Chips won't fix it. Dancing will.", sub: "Put on Fred Again and dance for 5 mins instead!", emoji: "💃" },
+  { roast: "Your CRP said NO to inflammation.", sub: "Chips = inflammation. Your blood report receipts don't lie.", emoji: "📋" },
+  { roast: "What would Dumbledore do?", sub: "He'd eat a lemon drop, not a packet of Lays.", emoji: "🍋" },
+  { roast: "One Direction walked so you could... walk.", sub: "Walk away from the chips. Towards a protein shake.", emoji: "🚶‍♀️" },
+  { roast: "Your Vitamin D is already struggling.", sub: "Don't add chip-related inflammation to its problems.", emoji: "☀️" },
+  { roast: "Plot twist: The chips don't love you back.", sub: "But Bunny does. Call him instead of snacking.", emoji: "💔" },
+  { roast: "Harry Styles is vegan sometimes.", sub: "You can at least skip the chips. Have a banana.", emoji: "🍌" },
+  { roast: "Your thyroid is WATCHING.", sub: "It doesn't need the extra sodium from chips right now.", emoji: "👁️" },
+  { roast: "Snape would be disappointed.", sub: "After all this time? Always... eating chips. Stop it.", emoji: "🖤" },
+  { roast: "Fred Again's drops hit harder than chip cravings.", sub: "Put on Delilah and dance instead.", emoji: "🎧" },
+  { roast: "Your future self will thank you.", sub: "For choosing roasted chana over Kurkure today.", emoji: "🙏" },
+  { roast: "The Room of Requirement has protein chips.", sub: "It does NOT have Lays. Hogwarts has standards.", emoji: "🏰" },
+  { roast: "Taylor has Eras, you have... chip eras?", sub: "Time for a new era. The Healthy Snacking Era.", emoji: "✨" },
+  { roast: "Zayn left 1D for a solo career.", sub: "You can leave chips for a protein shake. Same energy.", emoji: "🥤" },
+  { roast: "Bunny spent hours building this app.", sub: "The LEAST you can do is not eat chips. Come on.", emoji: "🐰" },
+  { roast: "Dobby is a free elf. You can be free from chips.", sub: "Here — have a protein bar. You're welcome.", emoji: "🧦" },
+]
 
 const CHIP_ALTS = [
   { name: "Protein Chips", cal: "120 cal/bag", why: "Crunchy, high protein, low guilt", emoji: "💪" },
@@ -227,17 +345,15 @@ function VitDMeter(props) {
 
 /* ─── Bunny Tip (AI) ─── */
 function BunnyTip() {
-  var _s1 = useState(pick(FALLBACK_TIPS)); var tip = _s1[0]; var setTip = _s1[1];
-  var _s2 = useState(false); var loading = _s2[0]; var setLoading = _s2[1];
+  var _s1 = useState(pick(BUNNY_TIPS)); var tip = _s1[0]; var setTip = _s1[1];
   var _s3 = useState(true); var anim = _s3[0]; var setAnim = _s3[1];
 
-  var fetchTip = async function() {
-    setLoading(true); setAnim(false);
-    var result = await askAI("Generate ONE funny wellness tip for Radhika from Bunny. Reference her health data, interests (Harry Styles, Fred Again, Taylor Swift, Harry Potter, One Direction), and Bunny. Be comical, warm, 1-2 sentences with emojis. Respond as JSON: {\"text\":\"the tip\",\"type\":\"call\"} where type is call, message, food, or health.");
+  var fetchTip = function() {
+    setAnim(false);
     setTimeout(function() {
-      if (result && result.text) { setTip(result); }
-      else { setTip(pick(FALLBACK_TIPS)); }
-      setAnim(true); setLoading(false);
+      var pool = BUNNY_TIPS.filter(function(t) { return t.text !== tip.text; });
+      setTip(pick(pool));
+      setAnim(true);
     }, 200);
   };
 
@@ -250,12 +366,12 @@ function BunnyTip() {
       <div className="bunny-tip-header">
         <img src={BUNNY_SRC} alt="Bunny" className="bunny-avatar" />
         <span className="bunny-tip-label">Bunny says</span>
-        <button onClick={fetchTip} className="bunny-refresh" disabled={loading}>{loading ? "⏳" : "↻"}</button>
+        <button onClick={fetchTip} className="bunny-refresh" >{"↻"}</button>
       </div>
-      <p className={"bunny-tip-text" + (anim ? " bunny-tip-in" : "")}>{loading ? "Bunny is thinking... 🐰" : tip.text}</p>
+      <p className={"bunny-tip-text" + (anim ? " bunny-tip-in" : "")}>{tip.text}</p>
       <div className="bunny-tip-actions">
-        {!loading && actionBtn}
-        <button onClick={fetchTip} className="bunny-another" disabled={loading}>{loading ? "Thinking..." : "Fresh tip from AI 🤖"}</button>
+        {actionBtn}
+        <button onClick={fetchTip} className="bunny-another" >{"Next tip 🔄"}</button>
       </div>
     </div>
   );
@@ -263,18 +379,9 @@ function BunnyTip() {
 
 /* ─── Chip Popup (AI) ─── */
 function ChipPopup(props) {
-  var _s1 = useState(pick(FALLBACK_ROASTS)); var roast = _s1[0]; var setRoast = _s1[1];
+  var _s1 = useState(pick(CHIP_ROASTS_LIST)); var roast = _s1[0]; var setRoast = _s1[1];
   var _s2 = useState(function() { return shuffle(CHIP_ALTS).slice(0, 3); }); var alts = _s2[0];
-  var loaded = useRef(false);
 
-  useEffect(function() {
-    if (loaded.current) return;
-    loaded.current = true;
-    (async function() {
-      var r = await askAI("Radhika is about to eat chips. Generate a funny roast to stop her. Reference Harry Styles, Taylor Swift, Dumbledore, Fred Again, or Bunny. Be dramatic, funny, 1-2 lines. Respond as JSON: {\"roast\":\"main line\",\"sub\":\"supporting line\",\"emoji\":\"one emoji\"}");
-      if (r && r.roast) setRoast(r);
-    })();
-  }, []);
 
   return (
     <div className="overlay">
@@ -489,6 +596,14 @@ export default function App() {
   var _s8d = useState(null); var kitchenRecipe = _s8d[0]; var setKitchenRecipe = _s8d[1];
   var _s9 = useState(false); var loaded = _s9[0]; var setLoaded = _s9[1];
 
+  // Weekly goals states
+  var _sg1 = useState(function() { return loadWeeklyGoals() || []; }); var weekGoals = _sg1[0]; var setWeekGoals = _sg1[1];
+  var _sg2 = useState(false); var showGoalSetup = _sg2[0]; var setShowGoalSetup = _sg2[1];
+  var _sg3 = useState(false); var goalsAiLoading = _sg3[0]; var setGoalsAiLoading = _sg3[1];
+  var _sg4 = useState(["", "", ""]); var goalDrafts = _sg4[0]; var setGoalDrafts = _sg4[1];
+  var _sg5 = useState([3, 3, 3]); var goalTargets = _sg5[0]; var setGoalTargets = _sg5[1];
+  var _sg6 = useState(null); var goalCelebration = _sg6[0]; var setGoalCelebration = _sg6[1];
+
   // Period tracker states
   var _sc1 = useState(function() { return loadHistory("rw_periods") || []; }); var periods = _sc1[0]; var setPeriods = _sc1[1];
   var _sc2 = useState(false); var showLogPeriod = _sc2[0]; var setShowLogPeriod = _sc2[1];
@@ -508,6 +623,11 @@ export default function App() {
     var doneStates = supps.map(function(s) { return s.done; });
     saveToday("rw_supps", doneStates);
   }, [supps]);
+
+  // Persist weekly goals
+  useEffect(function() {
+    if (weekGoals.length > 0) saveWeeklyGoals(weekGoals);
+  }, [weekGoals]);
 
   // Persist meals
   useEffect(function() {
@@ -540,6 +660,52 @@ export default function App() {
     flash("🌸 Period logged! Take care of yourself ❤️");
   };
 
+  var incrementGoal = function(idx) {
+    setWeekGoals(function(prev) {
+      return prev.map(function(g, i) {
+        if (i !== idx) return g;
+        var newCount = Math.min(g.current + 1, g.target);
+        var updated = Object.assign({}, g, { current: newCount });
+        // Celebration when goal is completed
+        if (newCount === g.target && g.current < g.target) {
+          setGoalCelebration(g.name);
+          setTimeout(function() { setGoalCelebration(null); }, 3000);
+        }
+        return updated;
+      });
+    });
+  };
+
+  var decrementGoal = function(idx) {
+    setWeekGoals(function(prev) {
+      return prev.map(function(g, i) {
+        if (i !== idx) return g;
+        return Object.assign({}, g, { current: Math.max(g.current - 1, 0) });
+      });
+    });
+  };
+
+  var saveNewGoals = function() {
+    var goals = goalDrafts.map(function(name, i) {
+      return { name: name.trim(), target: goalTargets[i], current: 0 };
+    }).filter(function(g) { return g.name.length > 0; });
+    if (goals.length === 0) return;
+    setWeekGoals(goals);
+    setShowGoalSetup(false);
+  };
+
+  var suggestGoalsAI = async function() {
+    setGoalsAiLoading(true);
+    var suppsDoneCount = supps.filter(function(s) { return s.done; }).length;
+    var prompt = "Suggest 3 small, achievable weekly health goals for Radhika. She has Vitamin D deficiency, elevated inflammation (CRP), borderline thyroid. She takes supplements (D3, B12, Iron, Omega-3, Magnesium). She loves cooking, dancing, Harry Styles, Fred Again. Current supplement streak: " + suppsDoneCount + "/" + supps.length + " today. Goals should be specific with a number target (like 'Walk after meals - 4 times'). Mix health, fun, and food goals. Respond as JSON: {"goals":[{"name":"goal description","target":3},{"name":"goal 2","target":4},{"name":"goal 3","target":2}]}";
+    var result = await askAI(prompt);
+    if (result && result.goals) {
+      setGoalDrafts(result.goals.map(function(g) { return g.name; }));
+      setGoalTargets(result.goals.map(function(g) { return g.target; }));
+    }
+    setGoalsAiLoading(false);
+  };
+
   var getCycleAiTip = async function(info) {
     setCycleAiLoading(true);
     var prompt = "Radhika is in her " + info.phaseLabel + " (day " + info.daysSinceLast + " of cycle, avg cycle " + info.avgCycle + " days). Give her a SHORT (2-3 sentences) personalized tip about what to eat, how to exercise, and how to feel better during this phase. Consider her health: Vitamin D deficient, elevated CRP inflammation, borderline TSH. Be warm, funny, reference Bunny or her interests. Respond as JSON: {\"tip\":\"the tip with emojis\",\"foods\":[\"food1\",\"food2\",\"food3\"],\"avoid\":[\"thing1\",\"thing2\"]}";
@@ -567,10 +733,19 @@ export default function App() {
   var logMeal = function(m) {
     setMeals(function(p) { return p.concat([m]); });
     setShowMeal(false);
-    (async function() {
-      var r = await askAI("Radhika just finished eating. Generate a SHORT (1-2 sentence) funny post-meal walk reminder. Reference Harry Styles, Fred Again, Dumbledore, or Taylor Swift. Respond as JSON: {\"message\":\"the walk nudge with emojis\"}");
-      flash(r && r.message ? r.message : "You just ate! Time for a 10-min walk 🚶‍♀️");
-    })();
+    var WALK_NUDGES = [
+      "You just ate! Time for a 10-min walk 🚶‍♀️ Put on Harry Styles and go!",
+      "Post-meal walk time! Dumbledore walked the castle halls — your turn! 🏰",
+      "Fred Again + fresh air = the perfect post-meal combo. Walk! 🎧🚶‍♀️",
+      "10 minutes. That's all. Walk it out! Your blood sugar will thank you. ✨",
+      "Taylor walks during her shows for 3 hours. You can do 10 minutes. Go! 👟",
+      "Harry Styles walks his dog. Walk yourself. Post-meal. Now. 🐕🚶‍♀️",
+      "Your digestive system just sent a request: WALK. Please accept. 📱🚶‍♀️",
+      "Sitting after eating is SO 2024. Walking after eating is the future. 🚶‍♀️✨",
+      "Put your shoes on. Open the door. Walk. Bunny's orders. 🐰👟",
+      "Post-meal walk = better digestion + better mood + Bunny is proud. Triple win. 🏆",
+    ];
+    flash(pick(WALK_NUDGES));
   };
 
   var suppDone = supps.filter(function(s) { return s.done; }).length;
@@ -603,6 +778,100 @@ export default function App() {
               <div className="stat-card"><div className="stat-ring" style={{ background: dayCal > 0 ? C.burgGhost : C.cream, color: C.burg }}>{Math.round(dayCal)}</div><span className="stat-label">Calories</span></div>
               <div className="stat-card"><div className="stat-ring" style={{ background: dayP > 0 ? C.oliveGhost : C.cream, color: C.olive }}>{Math.round(dayP)}g</div><span className="stat-label">Protein</span></div>
             </div>
+
+                        {/* Weekly Goals */}
+            {weekGoals.length > 0 ? (
+              <div style={{ background: C.warm, borderRadius: 20, padding: "18px 16px", marginBottom: 20, border: "1px solid " + C.sand }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                  <span style={{ fontFamily: "'Lora',serif", fontSize: 16, fontWeight: 600, color: C.charcoal }}>This Week's Goals 🎯</span>
+                  <span style={{ fontSize: 10, color: C.mist }}>{getWeekKey()}</span>
+                </div>
+                {weekGoals.map(function(goal, i) {
+                  var pct = goal.target > 0 ? (goal.current / goal.target) * 100 : 0;
+                  var isDone = goal.current >= goal.target;
+                  return (
+                    <div key={i} style={{ marginBottom: 12 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                        <span style={{ fontSize: 13, color: isDone ? C.olive : C.charcoal, fontWeight: isDone ? 600 : 400, textDecoration: isDone ? "line-through" : "none" }}>
+                          {isDone ? "✅ " : ""}{goal.name}
+                        </span>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <button onClick={function() { decrementGoal(i); }} disabled={goal.current <= 0} style={{ width: 24, height: 24, borderRadius: "50%", border: "1px solid " + C.sand, background: C.cream, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: C.stone }}>−</button>
+                          <span style={{ fontSize: 13, fontWeight: 700, color: isDone ? C.olive : C.burg, minWidth: 32, textAlign: "center" }}>{goal.current}/{goal.target}</span>
+                          <button onClick={function() { incrementGoal(i); }} disabled={isDone} style={{ width: 24, height: 24, borderRadius: "50%", border: "none", background: isDone ? C.sand : C.olive, fontSize: 14, cursor: isDone ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>+</button>
+                        </div>
+                      </div>
+                      <div style={{ height: 6, background: C.sand, borderRadius: 3, overflow: "hidden" }}>
+                        <div style={{ height: "100%", borderRadius: 3, background: isDone ? C.olive : "linear-gradient(90deg, " + C.burg + ", " + C.gold + ")", width: pct + "%", transition: "width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)" }} />
+                      </div>
+                    </div>
+                  );
+                })}
+                {weekGoals.every(function(g) { return g.current >= g.target; }) && (
+                  <div style={{ textAlign: "center", padding: "8px 0 4px", color: C.olive, fontSize: 13, fontWeight: 600 }}>
+                    🎉 All goals smashed this week! Bunny is SO proud! 🐰
+                  </div>
+                )}
+                <button onClick={function() { setShowGoalSetup(true); setGoalDrafts(weekGoals.map(function(g) { return g.name; })); setGoalTargets(weekGoals.map(function(g) { return g.target; })); }} style={{ background: "none", border: "none", fontSize: 11, color: C.mist, cursor: "pointer", marginTop: 4, fontFamily: "'Outfit',sans-serif" }}>Edit goals</button>
+              </div>
+            ) : (
+              <button onClick={function() { setShowGoalSetup(true); setGoalDrafts(["", "", ""]); setGoalTargets([3, 3, 3]); }} style={{ width: "100%", background: "linear-gradient(140deg, " + C.oliveGhost + ", " + C.warm + ")", border: "1.5px dashed " + C.olivePale + "", borderRadius: 20, padding: "20px 16px", cursor: "pointer", marginBottom: 20, textAlign: "center" }}>
+                <p style={{ fontSize: 16, margin: "0 0 4px", fontFamily: "'Lora',serif", color: C.olive }}>🎯 Set This Week's Goals</p>
+                <p style={{ fontSize: 12, color: C.stone, margin: 0 }}>Pick 3 small goals to work towards</p>
+              </button>
+            )}
+
+            {/* Goal celebration toast */}
+            {goalCelebration && (
+              <div className="toast" style={{ background: "linear-gradient(135deg, " + C.olive + ", " + C.oliveMid + ")" }}>
+                🎉 Goal completed: "{goalCelebration}"! You're amazing! 🐰✨
+              </div>
+            )}
+
+            {/* Goal setup modal */}
+            {showGoalSetup && (
+              <div className="overlay">
+                <div style={{ background: C.cream, borderRadius: 28, padding: "28px 22px", maxWidth: 380, width: "92%", maxHeight: "85vh", overflowY: "auto" }}>
+                  <h3 style={{ fontFamily: "'Lora',serif", fontSize: 20, color: C.olive, margin: "0 0 4px", textAlign: "center" }}>🎯 Weekly Goals</h3>
+                  <p style={{ fontSize: 12, color: C.stone, textAlign: "center", marginBottom: 16 }}>Set 3 small goals for this week</p>
+
+                  <button onClick={suggestGoalsAI} className="btn-primary" style={{ width: "100%", marginBottom: 16, fontSize: 13, padding: "12px 0" }} disabled={goalsAiLoading}>
+                    {goalsAiLoading ? "⏳ AI is thinking..." : "🤖 Suggest goals with AI"}
+                  </button>
+
+                  {[0, 1, 2].map(function(i) {
+                    return (
+                      <div key={i} style={{ marginBottom: 14 }}>
+                        <label style={{ fontSize: 11, color: C.stone, display: "block", marginBottom: 4 }}>Goal {i + 1}</label>
+                        <input
+                          value={goalDrafts[i] || ""}
+                          onChange={function(e) { setGoalDrafts(function(prev) { var n = prev.slice(); n[i] = e.target.value; return n; }); }}
+                          placeholder={["e.g. Walk after meals", "e.g. Sleep by 11 PM", "e.g. Try a new recipe"][i]}
+                          style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1.5px solid " + C.sand, fontSize: 14, fontFamily: "'Outfit',sans-serif", background: C.warm, outline: "none", marginBottom: 8, boxSizing: "border-box" }}
+                        />
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <span style={{ fontSize: 12, color: C.stone }}>Target:</span>
+                          {[1, 2, 3, 4, 5, 6, 7].map(function(n) {
+                            return (
+                              <button key={n} onClick={function() { setGoalTargets(function(prev) { var t = prev.slice(); t[i] = n; return t; }); }}
+                                style={{ width: 28, height: 28, borderRadius: "50%", border: goalTargets[i] === n ? "2px solid " + C.olive : "1px solid " + C.sand, background: goalTargets[i] === n ? C.oliveGhost : C.warm, color: goalTargets[i] === n ? C.olive : C.stone, fontSize: 12, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                {n}
+                              </button>
+                            );
+                          })}
+                          <span style={{ fontSize: 10, color: C.mist }}>times</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                    <button onClick={function() { setShowGoalSetup(false); }} className="btn-ghost" style={{ flex: 1 }}>Cancel</button>
+                    <button onClick={saveNewGoals} className="btn-primary" style={{ flex: 1 }}>Save Goals 🎯</button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="action-grid-3">
               <button className="action-card action-burg" onClick={function() { setShowMeal(true); }}>
