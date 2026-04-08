@@ -35,6 +35,63 @@ async function askAI(prompt) {
   }
 }
 
+
+/* ─── persistent storage ─── */
+function getTodayKey() {
+  return new Date().toISOString().split("T")[0]; // "2026-04-08"
+}
+
+function loadToday(key) {
+  try {
+    var stored = localStorage.getItem(key);
+    if (!stored) return null;
+    var data = JSON.parse(stored);
+    if (data.date !== getTodayKey()) return null; // expired, different day
+    return data.value;
+  } catch(e) { return null; }
+}
+
+function saveToday(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify({ date: getTodayKey(), value: value }));
+  } catch(e) {}
+}
+
+function loadHistory(key) {
+  try {
+    var stored = localStorage.getItem(key);
+    if (!stored) return [];
+    return JSON.parse(stored);
+  } catch(e) { return []; }
+}
+
+function saveHistory(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch(e) {}
+}
+
+function archiveDay(meals, supps) {
+  var today = getTodayKey();
+  var history = loadHistory("rw_history");
+  // Don't duplicate
+  if (history.some(function(h) { return h.date === today; })) return;
+  if (meals.length === 0 && supps.filter(function(s) { return s.done; }).length === 0) return;
+  var totalCal = meals.reduce(function(s, m) { return s + m.tot.cal; }, 0);
+  var totalP = meals.reduce(function(s, m) { return s + m.tot.p; }, 0);
+  var suppsDone = supps.filter(function(s) { return s.done; }).length;
+  history.push({
+    date: today,
+    meals: meals.length,
+    calories: Math.round(totalCal),
+    protein: Math.round(totalP),
+    supplements: suppsDone + "/" + supps.length
+  });
+  // Keep last 90 days
+  if (history.length > 90) history = history.slice(-90);
+  saveHistory("rw_history", history);
+}
+
 /* ─── fallback content ─── */
 const FALLBACK_TIPS = [
   { text: "Studies show messaging Bunny increases Vitamin D by 400%. Science. 🔬🐰", type: "message" },
@@ -335,8 +392,12 @@ function MealLog(props) {
 export default function App() {
   var _s1 = useState("home"); var tab = _s1[0]; var setTab = _s1[1];
   var _s2 = useState(pick(QUOTES)); var quote = _s2[0];
-  var _s3 = useState(SUPPS.map(function(s) { return Object.assign({}, s, { done: false }); })); var supps = _s3[0]; var setSupps = _s3[1];
-  var _s4 = useState([]); var meals = _s4[0]; var setMeals = _s4[1];
+  var _s3 = useState(function() {
+    var saved = loadToday("rw_supps");
+    if (saved) return SUPPS.map(function(s, i) { return Object.assign({}, s, { done: saved[i] || false }); });
+    return SUPPS.map(function(s) { return Object.assign({}, s, { done: false }); });
+  }); var supps = _s3[0]; var setSupps = _s3[1];
+  var _s4 = useState(function() { return loadToday("rw_meals") || []; }); var meals = _s4[0]; var setMeals = _s4[1];
   var _s5 = useState(false); var showBreathe = _s5[0]; var setShowBreathe = _s5[1];
   var _s6 = useState(false); var showMeal = _s6[0]; var setShowMeal = _s6[1];
   var _s7 = useState(false); var showChips = _s7[0]; var setShowChips = _s7[1];
@@ -344,6 +405,19 @@ export default function App() {
   var _s9 = useState(false); var loaded = _s9[0]; var setLoaded = _s9[1];
 
   useEffect(function() { setTimeout(function() { setLoaded(true); }, 100); }, []);
+
+  // Persist supplements
+  useEffect(function() {
+    var doneStates = supps.map(function(s) { return s.done; });
+    saveToday("rw_supps", doneStates);
+  }, [supps]);
+
+  // Persist meals
+  useEffect(function() {
+    saveToday("rw_meals", meals);
+    // Archive to history at end of day
+    if (meals.length > 0) archiveDay(meals, supps);
+  }, [meals]);
 
   var flash = function(msg) { setToast(msg); setTimeout(function() { setToast(null); }, 6000); };
   var toggleSupp = function(i) { setSupps(function(p) { return p.map(function(s, idx) { return idx === i ? Object.assign({}, s, { done: !s.done }) : s; }); }); };
@@ -484,6 +558,27 @@ export default function App() {
               })}
             </div>
             <BunnyTip />
+
+            {/* History */}
+            {(function() {
+              var history = loadHistory("rw_history");
+              if (history.length === 0) return null;
+              return (
+                <>
+                  <h3 className="section-title" style={{ marginTop: 28 }}>Past Days 📅</h3>
+                  {history.slice().reverse().slice(0, 14).map(function(day, i) {
+                    return (
+                      <div key={i} className="health-row" style={{ borderBottom: "1px solid " + C.sand, padding: "10px 0" }}>
+                        <span className="health-name">{day.date}</span>
+                        <span style={{ fontSize: 12, color: C.olive }}>{day.calories} cal</span>
+                        <span style={{ fontSize: 12, color: C.stone }}>{day.protein}g P</span>
+                        <span style={{ fontSize: 12, color: C.oliveMid }}>💊 {day.supplements}</span>
+                      </div>
+                    );
+                  })}
+                </>
+              );
+            })()}
           </div>
         )}
 
