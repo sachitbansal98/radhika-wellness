@@ -636,6 +636,11 @@ export default function App() {
   var _s5 = useState(false); var showBreathe = _s5[0]; var setShowBreathe = _s5[1];
   var _s6 = useState(false); var showMeal = _s6[0]; var setShowMeal = _s6[1];
   var _s7 = useState(false); var showChips = _s7[0]; var setShowChips = _s7[1];
+  var _sw1 = useState(false); var showWalkPrompt = _sw1[0]; var setShowWalkPrompt = _sw1[1];
+  var _sw2 = useState(false); var showWalkTimer = _sw2[0]; var setShowWalkTimer = _sw2[1];
+  var _sw3 = useState(600); var walkSeconds = _sw3[0]; var setWalkSeconds = _sw3[1];
+  var _sw4 = useState(false); var walkActive = _sw4[0]; var setWalkActive = _sw4[1];
+  var walkTimerRef = useRef(null);
   var _s7b = useState(false); var showVitdAnim = _s7b[0]; var setShowVitdAnim = _s7b[1];
   var _sconf = useState(false); var showConfetti = _sconf[0]; var setShowConfetti = _sconf[1];
 
@@ -666,6 +671,7 @@ export default function App() {
     return null;
   }); var todayAffirmation = _sa1[0]; var setTodayAffirmation = _sa1[1];
   var _sa2 = useState(false); var affirmLoading = _sa2[0]; var setAffirmLoading = _sa2[1];
+  var _sa3 = useState(false); var affirmOpen = _sa3[0]; var setAffirmOpen = _sa3[1];
 
   // Daily mood check-in
   var _sm1 = useState(function() {
@@ -749,6 +755,25 @@ export default function App() {
     setTimeout(function() { setLoaded(true); }, 100);
     if (!todayAffirmation) { setTimeout(function() { fetchAffirmation(); }, 500); }
   }, []);
+
+  // Walk timer
+  useEffect(function() {
+    if (walkActive && walkSeconds > 0) {
+      walkTimerRef.current = setInterval(function() {
+        setWalkSeconds(function(s) {
+          if (s <= 1) {
+            setWalkActive(false);
+            setShowWalkTimer(false);
+            triggerConfetti();
+            flash("🎉 10 minute walk DONE! You absolute legend, Cutie! 🐰");
+            return 600;
+          }
+          return s - 1;
+        });
+      }, 1000);
+      return function() { clearInterval(walkTimerRef.current); };
+    }
+  }, [walkActive, walkSeconds]);
 
   // Persist supplements
   useEffect(function() {
@@ -889,19 +914,7 @@ export default function App() {
     setMeals(function(p) { return p.concat([m]); });
     setShowMeal(false);
     triggerConfetti();
-    var WALK_NUDGES = [
-      "You just ate! Time for a 10-min walk 🚶‍♀️ Put on Harry Styles and go!",
-      "Post-meal walk time! Dumbledore walked the castle halls — your turn! 🏰",
-      "Fred Again + fresh air = the perfect post-meal combo. Walk! 🎧🚶‍♀️",
-      "10 minutes. That's all. Walk it out! Your blood sugar will thank you. ✨",
-      "Taylor walks during her shows for 3 hours. You can do 10 minutes. Go! 👟",
-      "Harry Styles walks his dog. Walk yourself. Post-meal. Now. 🐕🚶‍♀️",
-      "Your digestive system just sent a request: WALK. Please accept. 📱🚶‍♀️",
-      "Sitting after eating is SO 2024. Walking after eating is the future. 🚶‍♀️✨",
-      "Put your shoes on. Open the door. Walk. Bunny's orders. 🐰👟",
-      "Post-meal walk = better digestion + better mood + Bunny is proud. Triple win. 🏆",
-    ];
-    flash(pick(WALK_NUDGES));
+    setShowWalkPrompt(true);
   };
 
   var suppDone = supps.filter(function(s) { return s.done; }).length;
@@ -919,6 +932,50 @@ export default function App() {
       {showChips && <ChipPopup onClose={function() { setShowChips(false); }} />}
       {toast && <div className="toast">{toast}</div>}
       {showConfetti && <Confetti />}
+
+      {/* Walk Prompt after meal */}
+      {showWalkPrompt && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 1500, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", animation: "fadeIn 0.3s ease" }}>
+          <div style={{ background: "#FDFAF4", borderRadius: 28, padding: "32px 24px", maxWidth: 340, width: "90%", textAlign: "center", animation: "popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)" }}>
+            <span style={{ fontSize: 48, display: "block", marginBottom: 12 }}>🚶‍♀️</span>
+            <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 22, color: C.charcoal, margin: "0 0 8px" }}>Time to walk, Cutie!</h2>
+            <p style={{ fontSize: 13, color: C.stone, lineHeight: 1.6, margin: "0 0 20px" }}>You just logged a meal! A 10-minute walk helps digestion, lowers blood sugar, and makes Bunny proud. 🐰</p>
+            <button onClick={function() { setShowWalkPrompt(false); setShowWalkTimer(true); setWalkSeconds(600); setWalkActive(true); }} style={{ width: "100%", padding: 16, borderRadius: 50, border: "none", background: C.olive, color: "#fff", fontSize: 16, fontWeight: 600, cursor: "pointer", fontFamily: "'Outfit',sans-serif", marginBottom: 10, boxShadow: "0 4px 12px rgba(96,107,78,0.25)" }}>
+              Start 10-min walk timer ⏱️
+            </button>
+            <button onClick={function() { setShowWalkPrompt(false); }} style={{ background: "none", border: "none", color: C.mist, fontSize: 13, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>
+              Maybe later
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Walk Timer */}
+      {showWalkTimer && (
+        <div style={{ position: "fixed", inset: 0, background: "linear-gradient(180deg, " + C.oliveDeep + " 0%, " + C.olive + " 100%)", zIndex: 1500, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#fff" }}>
+          <p style={{ fontSize: 14, opacity: 0.7, margin: "0 0 8px", letterSpacing: 1 }}>WALKING</p>
+          <p style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 64, fontWeight: 600, margin: "0 0 4px" }}>
+            {String(Math.floor(walkSeconds / 60)).padStart(2, "0")}:{String(walkSeconds % 60).padStart(2, "0")}
+          </p>
+          <p style={{ fontSize: 13, opacity: 0.6, margin: "0 0 40px" }}>{walkActive ? "Keep going, Cutie! 🐰" : "Paused"}</p>
+          <div style={{ display: "flex", gap: 16 }}>
+            <button onClick={function() { setWalkActive(!walkActive); }} style={{ width: 56, height: 56, borderRadius: "50%", border: "2px solid rgba(255,255,255,0.3)", background: "rgba(255,255,255,0.1)", color: "#fff", fontSize: 20, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {walkActive ? "⏸" : "▶"}
+            </button>
+            <button onClick={function() { setShowWalkTimer(false); setWalkActive(false); setWalkSeconds(600); }} style={{ width: 56, height: 56, borderRadius: "50%", border: "2px solid rgba(255,255,255,0.3)", background: "rgba(255,255,255,0.1)", color: "#fff", fontSize: 20, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              ✖
+            </button>
+          </div>
+          <div style={{ marginTop: 40, display: "flex", gap: 12 }}>
+            <a href="spotify:artist:4oLeXFyACqeem2VImYeBFe" style={{ padding: "12px 20px", borderRadius: 50, background: "rgba(255,255,255,0.15)", color: "#fff", textDecoration: "none", fontSize: 13, fontFamily: "'Outfit',sans-serif" }}>🎵 Fred Again</a>
+            <a href="spotify:artist:6KImCVD70vtIoJWnq6nGn3" style={{ padding: "12px 20px", borderRadius: 50, background: "rgba(255,255,255,0.15)", color: "#fff", textDecoration: "none", fontSize: 13, fontFamily: "'Outfit',sans-serif" }}>🎵 Harry Styles</a>
+          </div>
+          <a href="spotify:artist:06HL4z0CvFAxyc27GXpf02" style={{ marginTop: 8, padding: "12px 20px", borderRadius: 50, background: "rgba(255,255,255,0.15)", color: "#fff", textDecoration: "none", fontSize: 13, fontFamily: "'Outfit',sans-serif" }}>🎵 Taylor Swift</a>
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 4, background: "rgba(255,255,255,0.2)" }}>
+            <div style={{ height: "100%", background: "#fff", width: ((600 - walkSeconds) / 600 * 100) + "%", transition: "width 1s linear" }} />
+          </div>
+        </div>
+      )}
 
       {/* Wednesday Vitamin D Popup - Can't ignore! */}
       {showVitDWed && (
@@ -1017,27 +1074,28 @@ export default function App() {
       <main className="content">
         {tab === "home" && (
           <div className="fade-in">
-            {/* Daily Affirmation */}
-            <div style={{
+            {/* Daily Affirmation - Collapsible */}
+            <div onClick={function() { setAffirmOpen(!affirmOpen); }} style={{
+              width: "100%", cursor: "pointer", border: "none", textAlign: "left",
               background: "linear-gradient(150deg, " + C.oliveGhost + " 0%, " + C.warm + " 50%, " + C.burgGhost + " 100%)",
-              borderRadius: 22, padding: "20px 18px", marginBottom: 16,
-              border: "none", boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
-              position: "relative", overflow: "hidden",
+              borderRadius: 22, padding: affirmOpen ? "20px 18px" : "14px 18px", marginBottom: 16,
+              boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
+              position: "relative", overflow: "hidden", transition: "padding 0.3s ease",
             }}>
               <div style={{ position: "absolute", top: -20, right: -20, width: 80, height: 80, borderRadius: "50%", background: "rgba(96,107,78,0.04)" }} />
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 13, fontWeight: 600, color: C.olive, letterSpacing: 0.5 }}>Today's Affirmation</span>
-                <button onClick={fetchAffirmation} disabled={affirmLoading} style={{ background: "none", border: "1px solid " + C.olivePale, width: 26, height: 26, borderRadius: "50%", fontSize: 12, cursor: "pointer", color: C.oliveMid, display: "flex", alignItems: "center", justifyContent: "center", opacity: affirmLoading ? 0.5 : 1 }}>
+                <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 13, fontWeight: 600, color: C.olive, letterSpacing: 0.5 }}>{affirmOpen ? "Today's Affirmation" : todayAffirmation ? "✨ Today's Affirmation — tap to read" : "✨ Your daily affirmation is ready"}</span>
+                <button onClick={function(e) { e.stopPropagation(); fetchAffirmation(); }} disabled={affirmLoading} style={{ display: affirmOpen ? "flex" : "none", background: "none", border: "1px solid " + C.olivePale, width: 26, height: 26, borderRadius: "50%", fontSize: 12, cursor: "pointer", color: C.oliveMid, alignItems: "center", justifyContent: "center", opacity: affirmLoading ? 0.5 : 1 }}>
                   {affirmLoading ? "⏳" : "↻"}
                 </button>
               </div>
-              {affirmLoading && !todayAffirmation ? (
+              {affirmOpen && affirmLoading && !todayAffirmation ? (
                 <p style={{ fontSize: 13, color: C.stone, fontStyle: "italic", margin: 0 }}>Bunny is writing something special for you... 🐰</p>
-              ) : todayAffirmation ? (
+              ) : affirmOpen && todayAffirmation ? (
                 <p style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 17, color: C.charcoal, lineHeight: 1.6, margin: 0, fontWeight: 500, fontStyle: "italic" }}>
                   {todayAffirmation.emoji} {todayAffirmation.text}
                 </p>
-              ) : (
+              ) : affirmOpen ? (
                 <p style={{ fontSize: 13, color: C.mist, margin: 0 }}>Tap ↻ to get your daily affirmation</p>
               )}
             </div>
