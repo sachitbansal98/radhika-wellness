@@ -658,6 +658,15 @@ export default function App() {
   var _sg5 = useState([3, 3, 3]); var goalTargets = _sg5[0]; var setGoalTargets = _sg5[1];
   var _sg6 = useState(null); var goalCelebration = _sg6[0]; var setGoalCelebration = _sg6[1];
 
+  // Daily AI affirmation
+  var _sa1 = useState(function() {
+    var key = "rw_affirmation_" + new Date().toISOString().split("T")[0];
+    var saved = localStorage.getItem(key);
+    if (saved) { try { return JSON.parse(saved); } catch(e) {} }
+    return null;
+  }); var todayAffirmation = _sa1[0]; var setTodayAffirmation = _sa1[1];
+  var _sa2 = useState(false); var affirmLoading = _sa2[0]; var setAffirmLoading = _sa2[1];
+
   // Daily mood check-in
   var _sm1 = useState(function() {
     var key = "rw_mood_" + new Date().toISOString().split("T")[0];
@@ -736,7 +745,10 @@ export default function App() {
   }); var vitdWeeks = _s10[0]; var setVitdWeeks = _s10[1];
   var vitdDoses = vitdWeeks.length;
 
-  useEffect(function() { setTimeout(function() { setLoaded(true); }, 100); }, []);
+  useEffect(function() {
+    setTimeout(function() { setLoaded(true); }, 100);
+    if (!todayAffirmation) { setTimeout(function() { fetchAffirmation(); }, 500); }
+  }, []);
 
   // Persist supplements
   useEffect(function() {
@@ -766,6 +778,25 @@ export default function App() {
   };
 
   var searchRecipe = function() { searchRecipeWith(kitchenQuery); };
+
+  var fetchAffirmation = async function() {
+    setAffirmLoading(true);
+    var cycleInfo = getCycleInfo(periods);
+    var moodHistory = loadHistory("rw_mood_history");
+    var recentMoods = moodHistory.slice(-3).map(function(m) { return m.mood; }).join(", ");
+    var dayName = new Date().toLocaleDateString("en-IN", { weekday: "long" });
+    var prompt = "Generate a deeply personal daily affirmation for Radhika. Today is " + dayName + ". ";
+    if (cycleInfo) { prompt += "She is in her " + cycleInfo.phaseLabel + " (day " + cycleInfo.daysSinceLast + " of cycle). "; }
+    if (recentMoods) { prompt += "Recent moods: " + recentMoods + ". "; }
+    prompt += "She builds a luxury home decor brand. Loves fashion, shoes, cooking. Boyfriend Bunny built this app. Soulmates from Toronto to Delhi. She struggles with feeling unseen and health anxiety. Make her feel powerful, seen, loved. Reference her specific life. 2-3 sentences. Warm not cheesy. End with something actionable. JSON only: the response should have keys affirmation and emoji.";
+    var result = await askAI(prompt);
+    if (result && result.affirmation) {
+      var data = { text: result.affirmation, emoji: result.emoji || "✨", date: new Date().toISOString().split("T")[0] };
+      setTodayAffirmation(data);
+      localStorage.setItem("rw_affirmation_" + data.date, JSON.stringify(data));
+    }
+    setAffirmLoading(false);
+  };
 
   var savePeriod = function() {
     if (!periodStartDate) return;
@@ -986,6 +1017,31 @@ export default function App() {
       <main className="content">
         {tab === "home" && (
           <div className="fade-in">
+            {/* Daily Affirmation */}
+            <div style={{
+              background: "linear-gradient(150deg, " + C.oliveGhost + " 0%, " + C.warm + " 50%, " + C.burgGhost + " 100%)",
+              borderRadius: 22, padding: "20px 18px", marginBottom: 16,
+              border: "none", boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
+              position: "relative", overflow: "hidden",
+            }}>
+              <div style={{ position: "absolute", top: -20, right: -20, width: 80, height: 80, borderRadius: "50%", background: "rgba(96,107,78,0.04)" }} />
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 13, fontWeight: 600, color: C.olive, letterSpacing: 0.5 }}>Today's Affirmation</span>
+                <button onClick={fetchAffirmation} disabled={affirmLoading} style={{ background: "none", border: "1px solid " + C.olivePale, width: 26, height: 26, borderRadius: "50%", fontSize: 12, cursor: "pointer", color: C.oliveMid, display: "flex", alignItems: "center", justifyContent: "center", opacity: affirmLoading ? 0.5 : 1 }}>
+                  {affirmLoading ? "⏳" : "↻"}
+                </button>
+              </div>
+              {affirmLoading && !todayAffirmation ? (
+                <p style={{ fontSize: 13, color: C.stone, fontStyle: "italic", margin: 0 }}>Bunny is writing something special for you... 🐰</p>
+              ) : todayAffirmation ? (
+                <p style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 17, color: C.charcoal, lineHeight: 1.6, margin: 0, fontWeight: 500, fontStyle: "italic" }}>
+                  {todayAffirmation.emoji} {todayAffirmation.text}
+                </p>
+              ) : (
+                <p style={{ fontSize: 13, color: C.mist, margin: 0 }}>Tap ↻ to get your daily affirmation</p>
+              )}
+            </div>
+
             <div className="stats-row">
               <div className="stat-card"><div className="stat-ring" style={{ background: suppDone === supps.length ? C.olive : C.oliveGhost, color: suppDone === supps.length ? "#fff" : C.olive }}>{suppDone}/{supps.length}</div><span className="stat-label">Supplements</span></div>
               <div className="stat-card"><div className="stat-ring" style={{ background: dayCal > 0 ? C.burgGhost : C.cream, color: C.burg }}>{Math.round(dayCal)}</div><span className="stat-label">Calories</span></div>
