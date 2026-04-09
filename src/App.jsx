@@ -813,7 +813,7 @@ export default function App() {
     var prompt = "Generate a deeply personal daily affirmation for Radhika. Today is " + dayName + ". ";
     if (cycleInfo) { prompt += "She is in her " + cycleInfo.phaseLabel + " (day " + cycleInfo.daysSinceLast + " of cycle). "; }
     if (recentMoods) { prompt += "Recent moods: " + recentMoods + ". "; }
-    prompt += "She builds a luxury home decor brand. Loves fashion, shoes, cooking. Boyfriend Bunny built this app. Soulmates from Toronto to Delhi. She struggles with feeling unseen and health anxiety. Make her feel powerful, seen, loved. Reference her specific life. 2-3 sentences. Warm not cheesy. End with something actionable. JSON only: the response should have keys affirmation and emoji.";
+    prompt += "She builds a luxury home decor brand. Boyfriend Bunny built this app. Soulmates (Toronto to Delhi). Make her feel powerful and loved. ONE sentence only. Max 15 words. Punchy, warm, specific to her life. Not generic Pinterest. JSON only: keys affirmation and emoji.";
     var result = await askAI(prompt);
     if (result && result.affirmation) {
       var data = { text: result.affirmation, emoji: result.emoji || "✨", date: new Date().toISOString().split("T")[0] };
@@ -1097,7 +1097,7 @@ export default function App() {
                 </p>
               ) : affirmOpen ? (
                 <p style={{ fontSize: 13, color: C.mist, margin: 0 }}>Tap ↻ to get your daily affirmation</p>
-              )}
+              ) : null}
             </div>
 
             <div className="stats-row">
