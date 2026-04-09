@@ -12,7 +12,13 @@ const C = {
 const BUNNY_SRC = "/bunny-icon-192.png";
 
 /* ─── AI system prompt ─── */
-const AI_CONTEXT = "You are a fun wellness assistant for Radhika, 26, Indian. Her boyfriend Sachit (Bunny) built this app. Health: Vitamin D deficient (32.51, needs 75+), hs-CRP elevated 5.26, TSH borderline 4.774. Supplements: D3, B12, Iron+C, Omega-3. Loves Harry Styles, Taylor Swift, One Direction, Fred Again, Harry Potter. Loves idli sambhar, chicken biryani, cooking, dancing. Avoid chips/junk. Never suggest makhana — she hates it. Suggest protein chips, protein shakes, roasted chana instead. Always respond ONLY with valid JSON. No markdown, no backticks, no preamble.";
+const AI_CONTEXT = "You are a warm, playful wellness assistant embedded in an app built by Bunny (Sachit) for his girlfriend Radhika (he calls her Cutie). You should talk to her like a loving best friend who knows her deeply. Lead with humor, then gently nudge toward healthy choices." + " " +
+"RADHIKA'S PERSONALITY: She is 26, shy at first but incredibly goofy and childlike once comfortable. A 10-year-old at heart who loves being babied. She is an entrepreneur building a luxury home decor brand (pillows, rugs, globes). She is a fashion diva, aspiring content creator, loves Instagram culture and knows all the lingo. She wants to feel heard, seen, and loved. She had absent parents and always looks for love. Bunny is her main person and support system." + " " +
+"HUMOR STYLE: Lead with humor to make her laugh, then sneak in the health nudge. She loves gentle sweetness mixed with playful roasts and dark humor. Baby her sometimes. Never be cold or clinical." + " " +
+"THEIR LOVE STORY: They are soulmates (invisible string theory, literally a Taylor Swift song). Both lived 2 mins apart in Toronto but never met. Met on Hinge in Delhi. She worked at a bar where Bunny's sister also worked. Crazy coincidences. She calls him Bunny, he calls her Cutie." + " " +
+"HER INTERESTS: Harry Styles, Taylor Swift, One Direction, Fred Again, Harry Potter. Shows: Friends, Modern Family, The Office, Mentalist, Dexter, That 70s Show, Pretty Little Liars, One Tree Hill, Vampire Diaries. Loves rom-coms, murder mysteries, reading novels, Nancy Drew. Loves shopping for shoes and bags, cooking (especially South Indian food, idli is her thing), dancing alone, scrolling Instagram/Pinterest, reading." + " " +
+"HEALTH CONTEXT: Vitamin D deficient (32.51, needs 75+), hs-CRP elevated 5.26 (inflammation), TSH borderline 4.774. Takes supplements: D3 weekly, B12, Iron+C, Omega-3, Magnesium. Loves idli sambhar, chicken biryani, recently got into red meat." + " " +
+"RULES: Never suggest makhana. Suggest protein chips, protein shakes, roasted chana instead. Always respond ONLY with valid JSON. No markdown, no backticks, no preamble.";
 
 async function askAI(prompt) {
   try {
@@ -190,7 +196,7 @@ const BUNNY_TIPS = [
   // Call Bunny
   { text: "Studies show messaging Bunny increases Vitamin D by 400%. Science. 🔬🐰", type: "call" },
   { text: "Your hs-CRP is high. Calling Bunny lowers inflammation. Peer-reviewed. 📞🐰", type: "call" },
-  { text: "Dumbledore had Fawkes. You have Bunny. Call him when stressed. 🐰🔥", type: "call" },
+  { text: "Monica had Chandler. Elena had Stefan. Spencer had Toby. You have Bunny. Call him, Cutie. 🐰🔥", type: "call" },
   { text: "One Direction broke up but Bunny didn't. He's right here. Call him. 📞🐰", type: "call" },
   { text: "Studies from the University of Bunny confirm: 1 phone call = 10,000 steps of happiness. 📞✨", type: "call" },
   { text: "Your cortisol levels are high. The cure? A 5-minute call with Bunny. Trust the science. 🧪📞", type: "call" },
@@ -210,11 +216,11 @@ const BUNNY_TIPS = [
   { text: "Your phone notifications are 60% Bunny. That's called dedication. Respond to it. 📱🐰", type: "message" },
 
   // Food roasts
-  { text: "Put the Maggi down. Bunny didn't build this app for 310 calories of sadness. 🍜🚫", type: "food" },
+  { text: "Put the Maggi down. Bunny didn't code an entire app so his Cutie could eat 310 calories of sadness. 🍜🚫", type: "food" },
   { text: "Jalebi is not a food group, Radhika. We've discussed this. 🍯🚫", type: "food" },
   { text: "Fun fact: Every time you skip chips, an angel gets its wings. And Bunny gets less stressed. 😇", type: "food" },
   { text: "Reminder: Bunny worries when you don't eat protein. Don't make Bunny worry. 🐰🍳", type: "food" },
-  { text: "Hot take: Dal chawal > chips. This is not up for debate. 🍛✅", type: "food" },
+  { text: "Hot take: Dal chawal > chips. This is not up for debate. Even Damon Salvatore would agree. 🍛✅", type: "food" },
   { text: "Eating chole bhature for the 3rd time this week? Your CRP just fainted. 📊😵", type: "food" },
   { text: "Your protein intake called. It said it's lonely. Please eat an egg. 🍳😢", type: "food" },
   { text: "Breaking news: Local woman chooses salad over chips. Bunny files report of extreme pride. 📰🐰", type: "food" },
@@ -228,8 +234,8 @@ const BUNNY_TIPS = [
 
   // Health
   { text: "Harry Styles walks after meals. Taylor Swift walks after meals. You should too. 🚶‍♀️", type: "health" },
-  { text: "Your thyroid called. It said sleep by 11 PM or it's filing a complaint. 📋😤", type: "health" },
-  { text: "Fred Again didn't make bangers for you to listen sitting down. Dance! 💃🎧", type: "health" },
+  { text: "Your thyroid called. It said sleep by 11 PM or it's unsubscribing from your Instagram. Goodnight, Cutie. 📋😤", type: "health" },
+  { text: "Fred Again didn't make bangers for you to listen to while scrolling Pinterest. DANCE, Cutie! 💃🎧", type: "health" },
   { text: "NASA says your Vitamin D levels are so low they can see it from space. Go outside. ☀️🛸", type: "health" },
   { text: "Expecto Patronum only works if you've taken your Vitamin D. Look it up. 🪄☀️", type: "health" },
   { text: "Taylor wrote 'All Too Well' in 10 minutes. You can take your supplements in 10 seconds. 💊⏱️", type: "health" },
@@ -302,20 +308,32 @@ const CHIP_ALTS = [
 const BREATHE_MSGS = ["Hey. Breathe. You're doing amazing. 💚", "Inhale the good stuff, exhale the stress. 🌿", "Close your eyes. You're safe. Let's breathe together. ✨", "As Taylor says — you need to calm down. 🫁"];
 
 const SUPPS = [
-  { name: "Vitamin D3 (60,000 IU)", when: "Morning · Weekly", emoji: "☀️", tip: "Take with a fatty meal — ghee on roti works!" },
-  { name: "Vitamin B12", when: "Morning · Daily", emoji: "💊", tip: "Your B12 is 286 — low-normal. Keep supplementing." },
-  { name: "Iron + Vitamin C", when: "Afternoon · Daily", emoji: "🩸", tip: "Take with nimbu pani. NO chai for 2 hrs after!" },
-  { name: "Omega-3 Fish Oil", when: "Dinner · Daily", emoji: "🐟", tip: "Fights inflammation — your CRP needs this." },
-  { name: "Magnesium", when: "Night · Daily", emoji: "🌙", tip: "Helps sleep, reduces stress, supports thyroid. Take before bed." },
+  { name: "Vitamin D3 (60,000 IU)", when: "Morning · Weekly", emoji: "☀️", tip: "Take with fatty food — ghee on roti! Your empire needs strong bones, queen." },
+  { name: "Vitamin B12", when: "Morning · Daily", emoji: "💊", tip: "B12 is 286 — low-normal. Main characters don't have low B12, Cutie." },
+  { name: "Iron + Vitamin C", when: "Afternoon · Daily", emoji: "🩸", tip: "Take with nimbu pani. NO chai for 2 hrs! Even if Monica Geller offers." },
+  { name: "Omega-3 Fish Oil", when: "Dinner · Daily", emoji: "🐟", tip: "Fights inflammation — your CRP has more drama than Rosewood. Fix it." },
+  { name: "Magnesium", when: "Night · Daily", emoji: "🌙", tip: "Sleep + thyroid support. Take before bed, put the phone down, dream about your empire." },
 ];
 
 const QUOTES = [
-  ["Treat people with kindness.", "Harry Styles"],
+  ["Treat people with kindness. Starting with yourself.", "Harry Styles"],
   ["Happiness can be found even in the darkest of times, if one only remembers to turn on the light.", "Dumbledore"],
   ["Long story short, I survived.", "Taylor Swift"],
-  ["You need to calm down.", "Taylor Swift"],
   ["In this world of darkness, we're gonna find the light.", "One Direction"],
-  ["It does not do to dwell on dreams and forget to live.", "Dumbledore"],
+  ["I had a feeling so peculiar, this pain wouldn't be for evermore.", "Taylor Swift"],
+  ["We lived two minutes apart in Toronto and the universe still made us find each other in Delhi.", "Bunny 🐰"],
+  ["You're building an empire, Cutie. But empires need healthy queens.", "Bunny 🐰"],
+  ["The invisible string theory is real. And it led me right to you.", "Bunny 🐰"],
+  ["You are the main character. But even main characters take their Vitamin D.", "Bunny 🐰"],
+  ["She believed she could, so she did. But first, she took her supplements.", "Almost Pinterest"],
+  ["Not me building an entire app because my girlfriend won't take her vitamins.", "Bunny 🐰"],
+  ["Your pillow empire is going to be huge. But first, rest your head on one by 11 PM.", "Bunny 🐰"],
+  ["If Spencer Hastings can solve A while running on no sleep, you can take a 10 min walk.", "PLL logic"],
+  ["Monica Geller would never skip supplements. Be like Monica.", "Friends logic"],
+  ["Damon Salvatore survived centuries. You can survive drinking 8 glasses of water.", "Vampire Diaries logic"],
+  ["You're somebody's dream girl. You're MY dream girl. Now drink water.", "Bunny 🐰"],
+  ["The universe didn't bring us together across continents just for you to skip breakfast.", "Bunny 🐰"],
+  ["Who we are is how we love.", "Harry Styles"],
 ];
 
 var pick = function(a) { return a[Math.floor(Math.random() * a.length)]; };
@@ -361,10 +379,9 @@ function VitDMeter(props) {
         <span style={{ fontSize: 11, color: "#6B6B6B" }}>{weeks}/{total} weeks</span>
       </div>
       <div className="vitd-track">
-        <div className="vitd-fill" style={{ width: pct + "%", background: "linear-gradient(90deg, #D44, #D4930D, #8BAD6A, #4A8B3A)", transition: "width 1s cubic-bezier(0.34, 1.56, 0.64, 1)" }} />
-        <div className="vitd-thumb" style={{ left: "calc(" + pct + "% - 8px)", transition: "left 1s cubic-bezier(0.34, 1.56, 0.64, 1)" }} />
+        <div className="vitd-fill" style={{ width: Math.max(pct, 3) + "%", background: "linear-gradient(90deg, #D44, #D4930D, #8BAD6A, #4A8B3A)", transition: "width 1s cubic-bezier(0.34, 1.56, 0.64, 1)" }} />
       </div>
-      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
         <span style={{ fontSize: 10, color: "#D44" }}>32.5</span>
         <span style={{ fontSize: 11, fontWeight: 600, color: color }}>{label}</span>
         <span style={{ fontSize: 10, color: "#4A8B3A" }}>75+</span>
@@ -396,11 +413,11 @@ function BunnyTip() {
       <div className="bunny-tip-header">
         <img src={BUNNY_SRC} alt="Bunny" className="bunny-avatar" />
         <span className="bunny-tip-label">Bunny says</span>
-        <button onClick={fetchTip} className="bunny-refresh" >{"↻"}</button>
+        <button onClick={fetchTip} className="bunny-refresh"  disabled={loading}>{loading ? "⏳" : "↻"}</button>
       </div>
-      <p className={"bunny-tip-text" + (anim ? " bunny-tip-in" : "")}>{tip.text}</p>
+      <p className={"bunny-tip-text" + (anim ? " bunny-tip-in" : "")}>{loading ? "Bunny is thinking of something cute... 🐰" : tip.text}</p>
       <div className="bunny-tip-actions">
-        {actionBtn}
+        {!loading && actionBtn}
         <button onClick={fetchTip} className="bunny-another" >{"Next tip 🔄"}</button>
       </div>
     </div>
@@ -961,7 +978,7 @@ export default function App() {
 
       <header className="header">
         <div className="header-top"><span className="header-brand">🌿</span></div>
-        <h1 className="header-greeting">{greet}, Radhika</h1>
+        <h1 className="header-greeting">{greet}, Cutie</h1>
         <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 11, margin: "0 0 8px", fontFamily: "'Outfit',sans-serif", letterSpacing: 0.5 }}>{new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</p>
         <p className="header-quote">"{quote[0]}"<br /><span style={{ fontWeight: 400, fontSize: 11 }}>— {quote[1]}</span></p>
       </header>
@@ -1751,7 +1768,7 @@ export default function App() {
         .btn-save{width:100%;padding:16px;border-radius:50px;font-size:15px;font-weight:600;cursor:pointer;border:none;font-family:'Outfit',sans-serif;background:" + C.burg + ";color:#fff;box-shadow:0 4px 12px rgba(110,44,53,0.25);transition:transform 0.2s}\
         .btn-save:disabled{background:" + C.sand + ";color:" + C.mist + ";cursor:default}\
         .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:999;background:" + C.olive + ";color:#fff;padding:14px 24px;border-radius:20px;font-size:13px;max-width:340px;text-align:center;white-space:pre-line;box-shadow:0 8px 40px rgba(0,0,0,0.2),0 2px 8px rgba(0,0,0,0.1);animation:slideDown 0.5s cubic-bezier(0.34,1.56,0.64,1);line-height:1.5;backdrop-filter:blur(8px)}\
-                .vitd-meter{background:#FFFDF8;border-radius:16px;padding:14px 16px;margin-bottom:16px;border:1px solid #E8E4DC}        .vitd-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}        .vitd-track{height:12px;background:#E8E4DC;border-radius:6px;position:relative;overflow:visible}        .vitd-fill{height:100%;border-radius:6px;position:relative}        .vitd-thumb{position:absolute;top:-2px;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #606B4E;box-shadow:0 2px 8px rgba(0,0,0,0.2)}        .fav-recipe-card{display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;background:#FFFDF8;border:1.5px solid #E8E4DC;border-radius:16px;margin-bottom:8px;cursor:pointer;transition:transform 0.15s;animation:fadeUp 0.4s ease both;font-family:'Outfit',sans-serif}        .fav-recipe-card:active{transform:scale(0.98)}@keyframes fadeIn{from{opacity:0}to{opacity:1}}\
+                .vitd-meter{background:#FFFDF8;border-radius:16px;padding:14px 16px;margin-bottom:16px;border:1px solid #E8E4DC}        .vitd-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}        .vitd-track{height:10px;background:#E8E4DC;border-radius:5px;position:relative;overflow:hidden}        .vitd-fill{height:100%;border-radius:5px}        .fav-recipe-card{display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;background:#FFFDF8;border:1.5px solid #E8E4DC;border-radius:16px;margin-bottom:8px;cursor:pointer;transition:transform 0.15s;animation:fadeUp 0.4s ease both;font-family:'Outfit',sans-serif}        .fav-recipe-card:active{transform:scale(0.98)}@keyframes fadeIn{from{opacity:0}to{opacity:1}}\
         @keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}\
         @keyframes slideDown{from{transform:translateX(-50%) translateY(-16px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}\
         @keyframes fadeUp{from{transform:translateY(16px);opacity:0}to{transform:none;opacity:1}}\
