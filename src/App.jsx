@@ -413,11 +413,11 @@ function BunnyTip() {
       <div className="bunny-tip-header">
         <img src={BUNNY_SRC} alt="Bunny" className="bunny-avatar" />
         <span className="bunny-tip-label">Bunny says</span>
-        <button onClick={fetchTip} className="bunny-refresh"  disabled={loading}>{loading ? "⏳" : "↻"}</button>
+        <button onClick={fetchTip} className="bunny-refresh" >{"↻"}</button>
       </div>
-      <p className={"bunny-tip-text" + (anim ? " bunny-tip-in" : "")}>{loading ? "Bunny is thinking of something cute... 🐰" : tip.text}</p>
+      <p className={"bunny-tip-text" + (anim ? " bunny-tip-in" : "")}>{tip.text}</p>
       <div className="bunny-tip-actions">
-        {!loading && actionBtn}
+        {actionBtn}
         <button onClick={fetchTip} className="bunny-another" >{"Next tip 🔄"}</button>
       </div>
     </div>
