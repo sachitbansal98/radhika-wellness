@@ -1183,7 +1183,7 @@ export default function App() {
                     <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: C.charcoal }}>🥚 Daily Protein (g)</p>
                     <div style={{ display: "flex", alignItems: "flex-end", gap: 6, height: 120 }}>
                       {last7.map(function(d, i) {
-                        var h = Math.max((d.protein / 70) * 100, 8);
+                        var maxProtein = Math.max.apply(null, last7.map(function(x) { return x.protein || 1; })); var h = Math.max((d.protein / Math.max(maxProtein, 70)) * 100, 5);
                         var dayName = days[new Date(d.date).getDay()];
                         var isGood = d.protein >= 50;
                         return (
@@ -1206,7 +1206,7 @@ export default function App() {
                     <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: C.charcoal }}>🔥 Daily Calories</p>
                     <div style={{ display: "flex", alignItems: "flex-end", gap: 6, height: 120 }}>
                       {last7.map(function(d, i) {
-                        var h = Math.max((d.calories / 2000) * 100, 8);
+                        var maxCalories = Math.max.apply(null, last7.map(function(x) { return x.calories || 1; })); var h = Math.max((d.calories / Math.max(maxCalories, 1)) * 100, 5);
                         var dayName = days[new Date(d.date).getDay()];
                         return (
                           <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
