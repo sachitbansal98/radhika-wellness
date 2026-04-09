@@ -631,6 +631,7 @@ export default function App() {
   var _s8c = useState(false); var kitchenLoading = _s8c[0]; var setKitchenLoading = _s8c[1];
   var _s8d = useState(null); var kitchenRecipe = _s8d[0]; var setKitchenRecipe = _s8d[1];
   var _s9 = useState(false); var loaded = _s9[0]; var setLoaded = _s9[1];
+  var _moodTap = useState(null); var tappedMood = _moodTap[0]; var setTappedMood = _moodTap[1];
 
   // Weekly goals states
   var _sg1 = useState(function() { return loadWeeklyGoals() || []; }); var weekGoals = _sg1[0]; var setWeekGoals = _sg1[1];
@@ -1248,9 +1249,7 @@ export default function App() {
                     var moodEmojis = { amazing: "🤩", good: "😊", okay: "😐", low: "😔", rough: "😢" };
                     var moodScores = { amazing: 5, good: 4, okay: 3, low: 2, rough: 1 };
                     var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-                    var _moodTap = useState(null);
-                    var tappedMood = _moodTap[0];
-                    var setTappedMood = _moodTap[1];
+
                     return (
                       <div style={{ background: C.warm, borderRadius: 20, padding: "20px 16px", marginBottom: 16, border: "none", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
                         <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: C.charcoal }}>😊 Mood This Week</p>
