@@ -74,20 +74,26 @@ function saveHistory(key, value) {
 function archiveDay(meals, supps) {
   var today = getTodayKey();
   var history = loadHistory("rw_history");
-  // Don't duplicate
-  if (history.some(function(h) { return h.date === today; })) return;
-  if (meals.length === 0 && supps.filter(function(s) { return s.done; }).length === 0) return;
-  var totalCal = meals.reduce(function(s, m) { return s + m.tot.cal; }, 0);
-  var totalP = meals.reduce(function(s, m) { return s + m.tot.p; }, 0);
+  var totalCal = meals.reduce(function(s, m) { return s + (m.tot && m.tot.cal ? m.tot.cal : 0); }, 0);
+  var totalP = meals.reduce(function(s, m) { return s + (m.tot && m.tot.p ? m.tot.p : 0); }, 0);
   var suppsDone = supps.filter(function(s) { return s.done; }).length;
-  history.push({
+  var entry = {
     date: today,
     meals: meals.length,
     calories: Math.round(totalCal),
     protein: Math.round(totalP),
     supplements: suppsDone + "/" + supps.length
-  });
-  // Keep last 90 days
+  };
+  // Replace today's entry if it exists, otherwise add new
+  var existingIdx = -1;
+  for (var i = 0; i < history.length; i++) {
+    if (history[i].date === today) { existingIdx = i; break; }
+  }
+  if (existingIdx >= 0) {
+    history[existingIdx] = entry;
+  } else {
+    history.push(entry);
+  }
   if (history.length > 90) history = history.slice(-90);
   saveHistory("rw_history", history);
 }
@@ -526,7 +532,7 @@ function MealLog(props) {
     if (!items.length) return;
     props.onSave({
       items: items.slice(),
-      tot: { cal: Math.round(tot.cal), p: Math.round(tot.p), c: Math.round(tot.c), f: Math.round(tot.f) },
+      tot: { cal: Math.round(tot.cal) || 0, p: Math.round(tot.p) || 0, c: Math.round(tot.c) || 0, f: Math.round(tot.f) || 0 },
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       note: aiNote
     });
@@ -704,9 +710,13 @@ export default function App() {
   var _sc5 = useState(null); var cycleAiTip = _sc5[0]; var setCycleAiTip = _sc5[1];
   var _sc6 = useState(false); var cycleAiLoading = _sc6[0]; var setCycleAiLoading = _sc6[1];
   var _s10 = useState(function() {
-    var saved = localStorage.getItem("rw_vitd_doses");
-    return saved ? parseInt(saved) : 0;
-  }); var vitdDoses = _s10[0]; var setVitdDoses = _s10[1];
+    var saved = localStorage.getItem("rw_vitd_weeks");
+    if (saved) {
+      try { return JSON.parse(saved); } catch(e) { return []; }
+    }
+    return [];
+  }); var vitdWeeks = _s10[0]; var setVitdWeeks = _s10[1];
+  var vitdDoses = vitdWeeks.length;
 
   useEffect(function() { setTimeout(function() { setLoaded(true); }, 100); }, []);
 
@@ -721,12 +731,11 @@ export default function App() {
     if (weekGoals.length > 0) saveWeeklyGoals(weekGoals);
   }, [weekGoals]);
 
-  // Persist meals
+  // Persist meals and archive to history
   useEffect(function() {
     saveToday("rw_meals", meals);
-    // Archive to history at end of day
-    if (meals.length > 0) archiveDay(meals, supps);
-  }, [meals]);
+    archiveDay(meals, supps);
+  }, [meals, supps]);
 
   var searchRecipeWith = async function(query) {
     if (!query.trim()) return;
@@ -814,9 +823,12 @@ export default function App() {
       if (!p[i].done) { triggerConfetti(); }
       // Track Vitamin D doses (first supplement, index 0)
       if (i === 0 && !p[0].done) {
-        var newDoses = vitdDoses + 1;
-        setVitdDoses(newDoses);
-        localStorage.setItem("rw_vitd_doses", String(newDoses));
+        var weekKey = getWeekKey();
+        if (vitdWeeks.indexOf(weekKey) === -1) {
+          var updated = vitdWeeks.concat([weekKey]);
+          setVitdWeeks(updated);
+          localStorage.setItem("rw_vitd_weeks", JSON.stringify(updated));
+        }
         setShowVitdAnim(true);
         setTimeout(function() { setShowVitdAnim(false); }, 2000);
         triggerConfetti();
@@ -845,8 +857,8 @@ export default function App() {
   };
 
   var suppDone = supps.filter(function(s) { return s.done; }).length;
-  var dayCal = meals.reduce(function(s, m) { return s + m.tot.cal; }, 0);
-  var dayP = meals.reduce(function(s, m) { return s + m.tot.p; }, 0);
+  var dayCal = meals.reduce(function(s, m) { return s + (m.tot && m.tot.cal ? m.tot.cal : 0); }, 0);
+  var dayP = meals.reduce(function(s, m) { return s + (m.tot && m.tot.p ? m.tot.p : 0); }, 0);
   var hr = new Date().getHours();
   var greet = hr < 12 ? "Good morning" : hr < 17 ? "Good afternoon" : "Good evening";
 
@@ -1140,6 +1152,10 @@ export default function App() {
         {tab === "reports" && (
           <div className="fade-in">
             <h3 className="section-title">Weekly Report 📊</h3>
+            <button onClick={function() {
+              archiveDay(meals, supps);
+              flash("📊 Reports refreshed with latest data!");
+            }} style={{ background: "none", border: "none", fontSize: 11, color: C.mist, cursor: "pointer", fontFamily: "'Outfit',sans-serif", marginBottom: 8 }}>↻ Refresh data</button>
             <p className="hint" style={{ marginBottom: 20 }}>Your progress over the past days</p>
 
             {(function() {
@@ -1232,20 +1248,39 @@ export default function App() {
                     var moodEmojis = { amazing: "🤩", good: "😊", okay: "😐", low: "😔", rough: "😢" };
                     var moodScores = { amazing: 5, good: 4, okay: 3, low: 2, rough: 1 };
                     var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+                    var _moodTap = useState(null);
+                    var tappedMood = _moodTap[0];
+                    var setTappedMood = _moodTap[1];
                     return (
                       <div style={{ background: C.warm, borderRadius: 20, padding: "20px 16px", marginBottom: 16, border: "none", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
                         <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: C.charcoal }}>😊 Mood This Week</p>
                         <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
                           {last7.map(function(d, i) {
                             var dayName = days[new Date(d.date).getDay()];
+                            var isActive = tappedMood === i;
                             return (
-                              <div key={i} style={{ flex: 1, textAlign: "center" }}>
+                              <div key={i} onClick={function() { setTappedMood(isActive ? null : i); }} style={{ flex: 1, textAlign: "center", cursor: "pointer", transition: "transform 0.2s", transform: isActive ? "scale(1.15)" : "scale(1)" }}>
                                 <span style={{ fontSize: 24, display: "block", marginBottom: 4 }}>{moodEmojis[d.mood] || "😐"}</span>
                                 <span style={{ fontSize: 9, color: C.mist }}>{dayName}</span>
                               </div>
                             );
                           })}
                         </div>
+                        {tappedMood !== null && last7[tappedMood] && (
+                          <div style={{ marginTop: 12, padding: "10px 14px", background: C.oliveGhost, borderRadius: 12, animation: "fadeUp 0.3s ease" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                              <span style={{ fontSize: 12, fontWeight: 600, color: C.charcoal }}>
+                                {new Date(last7[tappedMood].date).toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" })}
+                              </span>
+                              <span style={{ fontSize: 18 }}>{moodEmojis[last7[tappedMood].mood]}</span>
+                            </div>
+                            {last7[tappedMood].note ? (
+                              <p style={{ fontSize: 12, color: C.stone, margin: 0, lineHeight: 1.5, fontStyle: "italic" }}>"{last7[tappedMood].note}"</p>
+                            ) : (
+                              <p style={{ fontSize: 11, color: C.mist, margin: 0 }}>No note for this day</p>
+                            )}
+                          </div>
+                        )}
                       </div>
                     );
                   })()}
