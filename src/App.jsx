@@ -819,22 +819,21 @@ export default function App() {
   var flash = function(msg) { setToast(msg); setTimeout(function() { setToast(null); }, 6000); };
   var toggleSupp = function(i) {
     setSupps(function(p) {
-      var updated = p.map(function(s, idx) { return idx === i ? Object.assign({}, s, { done: !s.done }) : s; });
+      var newSupps = p.map(function(s, idx) { return idx === i ? Object.assign({}, s, { done: !s.done }) : s; });
       // Confetti for any supplement taken
       if (!p[i].done) { triggerConfetti(); }
       // Track Vitamin D doses (first supplement, index 0)
       if (i === 0 && !p[0].done) {
         var weekKey = getWeekKey();
         if (vitdWeeks.indexOf(weekKey) === -1) {
-          var updated = vitdWeeks.concat([weekKey]);
-          setVitdWeeks(updated);
-          localStorage.setItem("rw_vitd_weeks", JSON.stringify(updated));
+          var newWeeks = vitdWeeks.concat([weekKey]);
+          setVitdWeeks(newWeeks);
+          localStorage.setItem("rw_vitd_weeks", JSON.stringify(newWeeks));
         }
         setShowVitdAnim(true);
         setTimeout(function() { setShowVitdAnim(false); }, 2000);
-        triggerConfetti();
       }
-      return updated;
+      return newSupps;
     });
   };
 
@@ -1181,16 +1180,17 @@ export default function App() {
                   {/* Protein Chart */}
                   <div style={{ background: C.warm, borderRadius: 20, padding: "20px 16px", marginBottom: 16, border: "1px solid " + C.sand }}>
                     <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: C.charcoal }}>🥚 Daily Protein (g)</p>
-                    <div style={{ display: "flex", alignItems: "flex-end", gap: 6, height: 120 }}>
+                    <div style={{ display: "flex", gap: 6 }}>
                       {last7.map(function(d, i) {
-                        var maxProtein = Math.max.apply(null, last7.map(function(x) { return x.protein || 1; })); var h = Math.max((d.protein / Math.max(maxProtein, 70)) * 100, 5);
+                        var maxProtein = Math.max.apply(null, last7.map(function(x) { return x.protein || 0; }).concat([70]));
+                        var barH = Math.max(Math.round((d.protein / maxProtein) * 100), 4);
                         var dayName = days[new Date(d.date).getDay()];
                         var isGood = d.protein >= 50;
                         return (
-                          <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                            <span style={{ fontSize: 10, fontWeight: 600, color: isGood ? C.olive : C.burg }}>{d.protein}g</span>
-                            <div style={{ width: "100%", height: h + "%", minHeight: 8, background: isGood ? "linear-gradient(180deg, " + C.olive + ", " + C.oliveMid + ")" : "linear-gradient(180deg, " + C.burg + ", " + C.burgLight + ")", borderRadius: 6, transition: "height 0.5s ease" }} />
-                            <span style={{ fontSize: 9, color: C.mist }}>{dayName}</span>
+                          <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", height: 140 }}>
+                            <span style={{ fontSize: 10, fontWeight: 600, color: isGood ? C.olive : C.burg, marginBottom: 4 }}>{d.protein}g</span>
+                            <div style={{ width: "80%", height: barH + "px", minHeight: 4, background: isGood ? "linear-gradient(180deg, " + C.olive + ", " + C.oliveMid + ")" : "linear-gradient(180deg, " + C.burg + ", " + C.burgLight + ")", borderRadius: 6, transition: "height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)" }} />
+                            <span style={{ fontSize: 9, color: C.mist, marginTop: 4 }}>{dayName}</span>
                           </div>
                         );
                       })}
@@ -1204,15 +1204,16 @@ export default function App() {
                   {/* Calories Chart */}
                   <div style={{ background: C.warm, borderRadius: 20, padding: "20px 16px", marginBottom: 16, border: "1px solid " + C.sand }}>
                     <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: C.charcoal }}>🔥 Daily Calories</p>
-                    <div style={{ display: "flex", alignItems: "flex-end", gap: 6, height: 120 }}>
+                    <div style={{ display: "flex", gap: 6 }}>
                       {last7.map(function(d, i) {
-                        var maxCalories = Math.max.apply(null, last7.map(function(x) { return x.calories || 1; })); var h = Math.max((d.calories / Math.max(maxCalories, 1)) * 100, 5);
+                        var maxCalories = Math.max.apply(null, last7.map(function(x) { return x.calories || 0; }).concat([1]));
+                        var barH = Math.max(Math.round((d.calories / maxCalories) * 100), 4);
                         var dayName = days[new Date(d.date).getDay()];
                         return (
-                          <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                            <span style={{ fontSize: 10, fontWeight: 600, color: C.burg }}>{d.calories}</span>
-                            <div style={{ width: "100%", height: h + "%", minHeight: 8, background: "linear-gradient(180deg, " + C.burg + ", " + C.burgLight + ")", borderRadius: 6, transition: "height 0.5s ease" }} />
-                            <span style={{ fontSize: 9, color: C.mist }}>{dayName}</span>
+                          <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", height: 140 }}>
+                            <span style={{ fontSize: 10, fontWeight: 600, color: C.burg, marginBottom: 4 }}>{d.calories}</span>
+                            <div style={{ width: "80%", height: barH + "px", minHeight: 4, background: "linear-gradient(180deg, " + C.burg + ", " + C.burgLight + ")", borderRadius: 6, transition: "height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)" }} />
+                            <span style={{ fontSize: 9, color: C.mist, marginTop: 4 }}>{dayName}</span>
                           </div>
                         );
                       })}
