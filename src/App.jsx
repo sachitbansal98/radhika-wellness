@@ -1212,7 +1212,10 @@ export default function App() {
                     <div key={i} className="logged-meal">
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
                         <span style={{ fontSize: 12, color: C.mist }}>{m.time}</span>
-                        <span style={{ fontSize: 15, fontWeight: 700, color: C.burg }}>{Math.round(m.tot.cal)} cal</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <span style={{ fontSize: 15, fontWeight: 700, color: C.burg }}>{Math.round(m.tot.cal)} cal</span>
+                          <button onClick={function() { deleteMeal(i); }} style={{ background: "none", border: "none", color: C.mist, fontSize: 16, cursor: "pointer", padding: 0, lineHeight: 1 }}>×</button>
+                        </div>
                       </div>
                       <p style={{ margin: 0, fontSize: 13, color: C.charcoal, textTransform: "capitalize" }}>
                         {m.items.map(function(it) { return ((it.qty || 1) > 1 ? it.qty + "× " : "") + it.name; }).join(", ")}
