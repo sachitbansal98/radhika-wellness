@@ -738,6 +738,10 @@ export default function App() {
   var _sc2 = useState(false); var showLogPeriod = _sc2[0]; var setShowLogPeriod = _sc2[1];
   var _sc3 = useState(""); var periodStartDate = _sc3[0]; var setPeriodStartDate = _sc3[1];
   var _sc4 = useState("5"); var periodLength = _sc4[0]; var setPeriodLength = _sc4[1];
+  var _sc7 = useState(null); var editingPeriod = _sc7[0]; var setEditingPeriod = _sc7[1];
+  var _sc8 = useState(""); var editStart = _sc8[0]; var setEditStart = _sc8[1];
+  var _sc9 = useState(""); var editLength = _sc9[0]; var setEditLength = _sc9[1];
+  var _sc10 = useState(false); var editOngoing = _sc10[0]; var setEditOngoing = _sc10[1];
   var _sc5 = useState(null); var cycleAiTip = _sc5[0]; var setCycleAiTip = _sc5[1];
   var _sc6 = useState(false); var cycleAiLoading = _sc6[0]; var setCycleAiLoading = _sc6[1];
   var _s10 = useState(function() {
@@ -810,6 +814,39 @@ export default function App() {
     setPeriodStartDate("");
     setPeriodLength("5");
     flash("🌸 Period logged! Take care of yourself ❤️");
+  };
+
+  var openEditPeriod = function(periodEntry) {
+    setEditingPeriod(periodEntry);
+    setEditStart(periodEntry.start);
+    setEditLength(String(periodEntry.length || 5));
+    setEditOngoing(periodEntry.ongoing !== false);
+  };
+
+  var saveEditedPeriod = function() {
+    if (!editingPeriod || !editStart) return;
+    var updated = periods.map(function(p) {
+      if (p.start === editingPeriod.start && p.logged === editingPeriod.logged) {
+        return Object.assign({}, p, { start: editStart, length: parseInt(editLength) || 5, ongoing: editOngoing });
+      }
+      return p;
+    });
+    setPeriods(updated);
+    saveHistory("rw_periods", updated);
+    setEditingPeriod(null);
+    flash("Period updated!");
+  };
+
+  var deletePeriodEntry = function() {
+    if (!editingPeriod) return;
+    if (!confirm("Delete this period entry?")) return;
+    var updated = periods.filter(function(p) {
+      return !(p.start === editingPeriod.start && p.logged === editingPeriod.logged);
+    });
+    setPeriods(updated);
+    saveHistory("rw_periods", updated);
+    setEditingPeriod(null);
+    flash("Period entry deleted.");
   };
 
   var endCurrentPeriod = function() {
@@ -1929,11 +1966,20 @@ export default function App() {
                   <h3 className="section-title" style={{ marginTop: 20 }}>Past Periods 📅</h3>
                   {info.history.slice(0, 6).map(function(p, i) {
                     var startD = new Date(p.start);
+                    var endD = new Date(startD); endD.setDate(endD.getDate() + (p.length || 5) - 1);
+                    var isOngoing = p.ongoing !== false && i === 0 && info.phase === "period";
                     return (
-                      <div key={i} className="health-row">
-                        <span className="health-name">{startD.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
-                        <span className="health-val">{p.length} days</span>
-                      </div>
+                      <button key={i} onClick={function() { openEditPeriod(p); }} style={{ display: "flex", width: "100%", alignItems: "center", padding: "14px 16px", background: C.warm, border: "1px solid " + C.sand, borderRadius: 12, marginBottom: 8, cursor: "pointer", fontFamily: "'Outfit',sans-serif", textAlign: "left" }}>
+                        <div style={{ flex: 1 }}>
+                          <p style={{ fontSize: 13, fontWeight: 500, color: C.charcoal, margin: 0 }}>
+                            {startD.toLocaleDateString("en-IN", { day: "numeric", month: "short" })} – {isOngoing ? "ongoing" : endD.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                          </p>
+                          <p style={{ fontSize: 11, color: C.stone, margin: "2px 0 0" }}>
+                            {isOngoing ? "Currently on period" : (p.length || 5) + " days"} · {startD.toLocaleDateString("en-IN", { year: "numeric" })}
+                          </p>
+                        </div>
+                        <span style={{ fontSize: 14, color: C.mist }}>✎</span>
+                      </button>
                     );
                   })}
 
@@ -1961,6 +2007,49 @@ export default function App() {
 
                   <button onClick={savePeriod} disabled={!periodStartDate} className="btn-primary" style={{ width: "100%", marginBottom: 8, background: periodStartDate ? C.burg : C.sand }}>Save 🌸</button>
                   <button onClick={function() { setShowLogPeriod(false); }} className="btn-ghost">Cancel</button>
+                </div>
+              </div>
+            )}
+
+            {editingPeriod && (
+              <div className="overlay">
+                <div style={{ background: C.cream, borderRadius: 20, padding: "32px 24px", maxWidth: 340, width: "90%" }}>
+                  <p style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 22, color: C.burg, margin: "0 0 4px", textAlign: "center" }}>Edit Period</p>
+                  <p style={{ fontSize: 12, color: C.stone, marginBottom: 20, textAlign: "center" }}>Update your dates</p>
+
+                  <div style={{ marginBottom: 14 }}>
+                    <label style={{ fontSize: 11, color: C.stone, display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>Start Date</label>
+                    <input type="date" value={editStart} onChange={function(e) { setEditStart(e.target.value); }}
+                      style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: "1px solid " + C.sand, fontSize: 14, fontFamily: "'Outfit',sans-serif", background: C.warm, outline: "none", boxSizing: "border-box" }} />
+                  </div>
+
+                  <div style={{ marginBottom: 14 }}>
+                    <label style={{ fontSize: 11, color: C.stone, display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>Duration (days)</label>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      {["3", "4", "5", "6", "7", "8"].map(function(d) {
+                        return (
+                          <button key={d} onClick={function() { setEditLength(d); }}
+                            style={{ flex: 1, padding: "10px 0", borderRadius: 8, border: editLength === d ? "2px solid " + C.burg : "1px solid " + C.sand, background: editLength === d ? C.burgGhost : C.warm, color: editLength === d ? C.burg : C.stone, fontSize: 14, fontWeight: 500, cursor: "pointer" }}>
+                            {d}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: 20 }}>
+                    <label style={{ fontSize: 11, color: C.stone, display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>Status</label>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button onClick={function() { setEditOngoing(true); }}
+                        style={{ flex: 1, padding: "10px 0", borderRadius: 8, border: editOngoing ? "2px solid " + C.burg : "1px solid " + C.sand, background: editOngoing ? C.burgGhost : C.warm, color: editOngoing ? C.burg : C.stone, fontSize: 13, fontWeight: 500, cursor: "pointer" }}>Ongoing</button>
+                      <button onClick={function() { setEditOngoing(false); }}
+                        style={{ flex: 1, padding: "10px 0", borderRadius: 8, border: !editOngoing ? "2px solid " + C.burg : "1px solid " + C.sand, background: !editOngoing ? C.burgGhost : C.warm, color: !editOngoing ? C.burg : C.stone, fontSize: 13, fontWeight: 500, cursor: "pointer" }}>Ended</button>
+                    </div>
+                  </div>
+
+                  <button onClick={saveEditedPeriod} disabled={!editStart} className="btn-primary" style={{ width: "100%", marginBottom: 8, background: editStart ? C.burg : C.sand }}>Save Changes</button>
+                  <button onClick={deletePeriodEntry} style={{ width: "100%", padding: "10px", borderRadius: 50, border: "1px solid " + C.sand, background: "none", color: C.stone, fontSize: 12, cursor: "pointer", fontFamily: "'Outfit',sans-serif", marginBottom: 8 }}>Delete entry</button>
+                  <button onClick={function() { setEditingPeriod(null); }} className="btn-ghost" style={{ width: "100%" }}>Cancel</button>
                 </div>
               </div>
             )}
