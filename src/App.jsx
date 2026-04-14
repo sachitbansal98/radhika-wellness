@@ -12,7 +12,7 @@ const C = {
 const BUNNY_SRC = "/bunny-icon-192.png";
 
 /* ─── AI system prompt ─── */
-const AI_CONTEXT = "You are a warm, playful wellness assistant embedded in an app built by Bunny (Sachit) for his girlfriend Radhika (he calls her Cutie). You should talk to her like a loving best friend who knows her deeply. Lead with humor, then gently nudge toward healthy choices." + " " +
+const AI_CONTEXT = "You are a warm, playful wellness assistant embedded in an app built by Bunny (Sachit) for his girlfriend Radhika (he calls her Cutie). You should talk to her like a loving best friend who knows her deeply. Lead with humor, then gently nudge toward healthy choices. When using her name, mix it up naturally: Radu (her nickname, use most often), Radhika (her real name), or Cutie (Bunny's pet name). Roughly 50% Radu, 30% Radhika, 20% Cutie." + " " +
 "RADHIKA'S PERSONALITY: She is 26, shy at first but incredibly goofy and childlike once comfortable. A 10-year-old at heart who loves being babied. She is an entrepreneur building a luxury home decor brand (pillows, rugs, globes). She is a fashion diva, aspiring content creator, loves Instagram culture and knows all the lingo. She wants to feel heard, seen, and loved. She had absent parents and always looks for love. Bunny is her main person and support system." + " " +
 "HUMOR STYLE: Lead with humor to make her laugh, then sneak in the health nudge. She loves gentle sweetness mixed with playful roasts and dark humor. Baby her sometimes. Never be cold or clinical." + " " +
 "THEIR LOVE STORY: They are soulmates (invisible string theory, literally a Taylor Swift song). Both lived 2 mins apart in Toronto but never met. Met on Hinge in Delhi. She worked at a bar where Bunny's sister also worked. Crazy coincidences. She calls him Bunny, he calls her Cutie." + " " +
@@ -196,7 +196,7 @@ const BUNNY_TIPS = [
   // Call Bunny
   { text: "Studies show messaging Bunny increases Vitamin D by 400%. Science. 🔬🐰", type: "call" },
   { text: "Your hs-CRP is high. Calling Bunny lowers inflammation. Peer-reviewed. 📞🐰", type: "call" },
-  { text: "Monica had Chandler. Elena had Stefan. Spencer had Toby. You have Bunny. Call him, Cutie. 🐰🔥", type: "call" },
+  { text: "Monica had Chandler. Elena had Stefan. Spencer had Toby. You have Bunny. Call him, Radu. 🐰🔥", type: "call" },
   { text: "One Direction broke up but Bunny didn't. He's right here. Call him. 📞🐰", type: "call" },
   { text: "Studies from the University of Bunny confirm: 1 phone call = 10,000 steps of happiness. 📞✨", type: "call" },
   { text: "Your cortisol levels are high. The cure? A 5-minute call with Bunny. Trust the science. 🧪📞", type: "call" },
@@ -216,7 +216,7 @@ const BUNNY_TIPS = [
   { text: "Your phone notifications are 60% Bunny. That's called dedication. Respond to it. 📱🐰", type: "message" },
 
   // Food roasts
-  { text: "Put the Maggi down. Bunny didn't code an entire app so his Cutie could eat 310 calories of sadness. 🍜🚫", type: "food" },
+  { text: "Put the Maggi down. Bunny didn't code an entire app so his Radu could eat 310 calories of sadness. 🍜🚫", type: "food" },
   { text: "Jalebi is not a food group, Radhika. We've discussed this. 🍯🚫", type: "food" },
   { text: "Fun fact: Every time you skip chips, an angel gets its wings. And Bunny gets less stressed. 😇", type: "food" },
   { text: "Reminder: Bunny worries when you don't eat protein. Don't make Bunny worry. 🐰🍳", type: "food" },
@@ -234,7 +234,7 @@ const BUNNY_TIPS = [
 
   // Health
   { text: "Harry Styles walks after meals. Taylor Swift walks after meals. You should too. 🚶‍♀️", type: "health" },
-  { text: "Your thyroid called. It said sleep by 11 PM or it's unsubscribing from your Instagram. Goodnight, Cutie. 📋😤", type: "health" },
+  { text: "Your thyroid called. It said sleep by 11 PM or it's unsubscribing from your Instagram. Goodnight, Radu. 📋😤", type: "health" },
   { text: "Fred Again didn't make bangers for you to listen to while scrolling Pinterest. DANCE, Cutie! 💃🎧", type: "health" },
   { text: "NASA says your Vitamin D levels are so low they can see it from space. Go outside. ☀️🛸", type: "health" },
   { text: "Expecto Patronum only works if you've taken your Vitamin D. Look it up. 🪄☀️", type: "health" },
@@ -309,7 +309,7 @@ const BREATHE_MSGS = ["Hey. Breathe. You're doing amazing. 💚", "Inhale the go
 
 const SUPPS = [
   { name: "Vitamin D3 (60,000 IU)", when: "Morning · Weekly", emoji: "☀️", tip: "Take with fatty food — ghee on roti! Your empire needs strong bones, queen." },
-  { name: "Vitamin B12", when: "Morning · Daily", emoji: "💊", tip: "B12 is 286 — low-normal. Main characters don't have low B12, Cutie." },
+  { name: "Vitamin B12", when: "Morning · Daily", emoji: "💊", tip: "B12 is 286 — low-normal. Main characters don't have low B12, Radhika." },
   { name: "Iron + Vitamin C", when: "Afternoon · Daily", emoji: "🩸", tip: "Take with nimbu pani. NO chai for 2 hrs! Even if Monica Geller offers." },
   { name: "Omega-3 Fish Oil", when: "Dinner · Daily", emoji: "🐟", tip: "Fights inflammation — your CRP has more drama than Rosewood. Fix it." },
   { name: "Magnesium", when: "Night · Daily", emoji: "🌙", tip: "Sleep + thyroid support. Take before bed, put the phone down, dream about your empire." },
@@ -652,6 +652,13 @@ export default function App() {
   var _s8b = useState(""); var kitchenQuery = _s8b[0]; var setKitchenQuery = _s8b[1];
   var _s8c = useState(false); var kitchenLoading = _s8c[0]; var setKitchenLoading = _s8c[1];
   var _s8d = useState(null); var kitchenRecipe = _s8d[0]; var setKitchenRecipe = _s8d[1];
+  // Chat states
+  var _sch1 = useState(function() {
+    try { var saved = localStorage.getItem("rw_chat_history"); return saved ? JSON.parse(saved) : []; } catch(e) { return []; }
+  }); var chatMessages = _sch1[0]; var setChatMessages = _sch1[1];
+  var _sch2 = useState(""); var chatInput = _sch2[0]; var setChatInput = _sch2[1];
+  var _sch3 = useState(false); var chatLoading = _sch3[0]; var setChatLoading = _sch3[1];
+  var chatEndRef = useRef(null);
   var _s9 = useState(false); var loaded = _s9[0]; var setLoaded = _s9[1];
   var _moodTap = useState(null); var tappedMood = _moodTap[0]; var setTappedMood = _moodTap[1];
 
@@ -793,7 +800,8 @@ export default function App() {
 
     var savePeriod = function() {
     if (!periodStartDate) return;
-    var entry = { start: periodStartDate, length: parseInt(periodLength) || 5, logged: getTodayKey() };
+    // Default length to 5 days — user can update later when period ends
+    var entry = { start: periodStartDate, length: parseInt(periodLength) || 5, logged: getTodayKey(), ongoing: true };
     var updated = periods.concat([entry]);
     setPeriods(updated);
     saveHistory("rw_periods", updated);
@@ -801,6 +809,25 @@ export default function App() {
     setPeriodStartDate("");
     setPeriodLength("5");
     flash("🌸 Period logged! Take care of yourself ❤️");
+  };
+
+  var endCurrentPeriod = function() {
+    var sorted = periods.slice().sort(function(a, b) { return new Date(b.start) - new Date(a.start); });
+    if (sorted.length === 0) return;
+    var last = sorted[0];
+    var startD = new Date(last.start);
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    var daysDiff = Math.floor((today - startD) / (1000 * 60 * 60 * 24)) + 1;
+    var updated = periods.map(function(p) {
+      if (p.start === last.start) {
+        return Object.assign({}, p, { length: Math.max(daysDiff, 1), ongoing: false });
+      }
+      return p;
+    });
+    setPeriods(updated);
+    saveHistory("rw_periods", updated);
+    flash("🌸 Period ended after " + daysDiff + " days. Take care, Radu!");
   };
 
   var incrementGoal = function(idx) {
@@ -855,6 +882,59 @@ export default function App() {
     var result = await askAI(prompt);
     if (result) setCycleAiTip(result);
     setCycleAiLoading(false);
+  };
+
+  var sendChatMessage = async function() {
+    var msg = chatInput.trim();
+    if (!msg || chatLoading) return;
+    var userMsg = { role: "user", content: msg, time: new Date().toISOString() };
+    var newMessages = chatMessages.concat([userMsg]);
+    setChatMessages(newMessages);
+    setChatInput("");
+    setChatLoading(true);
+    try {
+      localStorage.setItem("rw_chat_history", JSON.stringify(newMessages));
+    } catch(e) {}
+
+    // Build conversation history for Claude (last 10 messages for context)
+    var recentHistory = newMessages.slice(-10).map(function(m) {
+      return { role: m.role, content: m.content };
+    });
+
+    try {
+      var res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 800,
+          system: AI_CONTEXT + " You are now in CHAT MODE. Radhika is chatting with you directly. Be her warm, funny best friend. Keep responses conversational (2-4 sentences usually, unless she asks for detail). Be genuinely helpful and give real insights when she asks serious questions, but keep the tone playful and loving. You can reference her health data, shows she loves, her brand, or Bunny when relevant. DO NOT respond in JSON — respond in plain text like a normal chat message.",
+          messages: recentHistory,
+        }),
+      });
+      var data = await res.json();
+      var text = (data.content || []).map(function(b) { return b.text || ""; }).join("").trim();
+      if (!text) text = "Hmm, I got a little lost there. Try again, Radu? 🐰";
+      var aiMsg = { role: "assistant", content: text, time: new Date().toISOString() };
+      var finalMessages = newMessages.concat([aiMsg]);
+      setChatMessages(finalMessages);
+      try {
+        localStorage.setItem("rw_chat_history", JSON.stringify(finalMessages.slice(-50)));
+      } catch(e) {}
+    } catch(e) {
+      var errorMsg = { role: "assistant", content: "Oops, something went wrong! Try again in a sec, Radhika 💚", time: new Date().toISOString() };
+      setChatMessages(newMessages.concat([errorMsg]));
+    }
+    setChatLoading(false);
+    setTimeout(function() {
+      if (chatEndRef.current) chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
+
+  var clearChat = function() {
+    if (!confirm("Clear all chat history?")) return;
+    setChatMessages([]);
+    localStorage.removeItem("rw_chat_history");
   };
 
   var flash = function(msg) { setToast(msg); setTimeout(function() { setToast(null); }, 6000); };
@@ -915,7 +995,7 @@ export default function App() {
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 1500, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", animation: "fadeIn 0.3s ease" }}>
           <div style={{ background: "#FDFAF4", borderRadius: 28, padding: "32px 24px", maxWidth: 340, width: "90%", textAlign: "center", animation: "popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)" }}>
             <span style={{ fontSize: 48, display: "block", marginBottom: 12 }}>🚶‍♀️</span>
-            <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 22, color: C.charcoal, margin: "0 0 8px" }}>Time to walk, Cutie!</h2>
+            <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 22, color: C.charcoal, margin: "0 0 8px" }}>Time to walk, Radhika!</h2>
             <p style={{ fontSize: 13, color: C.stone, lineHeight: 1.6, margin: "0 0 20px" }}>You just logged a meal! A 10-minute walk helps digestion, lowers blood sugar, and makes Bunny proud. 🐰</p>
             <button onClick={function() { setShowWalkPrompt(false); setShowWalkTimer(true); setWalkSeconds(600); setWalkActive(true); }} style={{ width: "100%", padding: 16, borderRadius: 50, border: "none", background: C.olive, color: "#fff", fontSize: 16, fontWeight: 600, cursor: "pointer", fontFamily: "'Outfit',sans-serif", marginBottom: 10, boxShadow: "0 4px 12px rgba(96,107,78,0.25)" }}>
               Start 10-min walk timer ⏱️
@@ -934,7 +1014,7 @@ export default function App() {
           <p style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 64, fontWeight: 600, margin: "0 0 4px" }}>
             {String(Math.floor(walkSeconds / 60)).padStart(2, "0")}:{String(walkSeconds % 60).padStart(2, "0")}
           </p>
-          <p style={{ fontSize: 13, opacity: 0.6, margin: "0 0 40px" }}>{walkActive ? "Keep going, Cutie! 🐰" : "Paused"}</p>
+          <p style={{ fontSize: 13, opacity: 0.6, margin: "0 0 40px" }}>{walkActive ? "Keep going, Radu! 🐰" : "Paused"}</p>
           <div style={{ display: "flex", gap: 16 }}>
             <button onClick={function() { setWalkActive(!walkActive); }} style={{ width: 56, height: 56, borderRadius: "50%", border: "2px solid rgba(255,255,255,0.3)", background: "rgba(255,255,255,0.1)", color: "#fff", fontSize: 20, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
               {walkActive ? "⏸" : "▶"}
@@ -1043,7 +1123,7 @@ export default function App() {
 
       <header className="header">
         <div className="header-top"><span className="header-brand">🌿</span></div>
-        <h1 className="header-greeting">{greet}, Cutie</h1>
+        <h1 className="header-greeting">{greet}, Radhika</h1>
         <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 11, margin: "0 0 8px", fontFamily: "'Outfit',sans-serif", letterSpacing: 0.5 }}>{new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</p>
         <p className="header-quote">"{quote[0]}"<br /><span style={{ fontWeight: 400, fontSize: 11 }}>— {quote[1]}</span></p>
       </header>
@@ -1051,7 +1131,7 @@ export default function App() {
       <main className="content">
         {tab === "home" && (
           <div className="fade-in">
-            <div className="stats-row">
+            <div onClick={function() { setTab("reports"); }} style={{ cursor: "pointer" }} className="stats-row">
               <div className="stat-card"><div className="stat-ring" style={{ background: suppDone === supps.length ? C.olive : C.oliveGhost, color: suppDone === supps.length ? "#fff" : C.olive }}>{suppDone}/{supps.length}</div><span className="stat-label">Supplements</span></div>
               <div className="stat-card"><div className="stat-ring" style={{ background: dayCal > 0 ? C.burgGhost : C.cream, color: C.burg }}>{Math.round(dayCal)}</div><span className="stat-label">Calories</span></div>
               <div className="stat-card"><div className="stat-ring" style={{ background: dayP > 0 ? C.oliveGhost : C.cream, color: C.olive }}>{Math.round(dayP)}g</div><span className="stat-label">Protein</span></div>
@@ -1380,6 +1460,71 @@ export default function App() {
           </div>
         )}
 
+        {tab === "chat" && (
+          <div className="fade-in" style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 240px)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <h3 className="section-title" style={{ margin: 0 }}>Chat with AI 💬</h3>
+              {chatMessages.length > 0 && (
+                <button onClick={clearChat} style={{ background: "none", border: "none", fontSize: 11, color: C.mist, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>Clear</button>
+              )}
+            </div>
+
+            {/* Messages */}
+            <div style={{ flex: 1, overflowY: "auto", marginBottom: 12, paddingBottom: 4 }}>
+              {chatMessages.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "30px 20px", color: C.stone }}>
+                  <img src={BUNNY_SRC} alt="Bunny" style={{ width: 56, height: 56, borderRadius: "50%", objectFit: "cover", border: "3px solid " + C.olivePale, marginBottom: 12 }} />
+                  <p style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 18, color: C.charcoal, margin: "0 0 6px" }}>Hi Radu! 💚</p>
+                  <p style={{ fontSize: 13, color: C.stone, lineHeight: 1.5, margin: "0 0 16px" }}>Ask me anything — health tips, recipes, feelings, business questions, gossip about your favourite shows. I know you well.</p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6, maxWidth: 280, margin: "0 auto" }}>
+                    {["I feel tired today, what should I do?", "What would Monica Geller order for dinner?", "Give me a pep talk for a big meeting", "Quick healthy breakfast idea?"].map(function(s) {
+                      return <button key={s} onClick={function() { setChatInput(s); }} style={{ background: C.oliveGhost, border: "none", padding: "10px 14px", borderRadius: 14, fontSize: 12, color: C.olive, cursor: "pointer", fontFamily: "'Outfit',sans-serif", textAlign: "left" }}>💭 {s}</button>;
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {chatMessages.map(function(m, i) {
+                    var isUser = m.role === "user";
+                    return (
+                      <div key={i} style={{ display: "flex", justifyContent: isUser ? "flex-end" : "flex-start", marginBottom: 10 }}>
+                        {!isUser && <img src={BUNNY_SRC} alt="Bunny" style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover", marginRight: 8, flexShrink: 0, alignSelf: "flex-end" }} />}
+                        <div style={{ maxWidth: "75%", padding: "10px 14px", borderRadius: 18, background: isUser ? C.burg : C.warm, color: isUser ? "#fff" : C.charcoal, fontSize: 13.5, lineHeight: 1.5, boxShadow: "0 1px 3px rgba(0,0,0,0.04)", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+                          {m.content}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {chatLoading && (
+                    <div style={{ display: "flex", alignItems: "flex-end", marginBottom: 10 }}>
+                      <img src={BUNNY_SRC} alt="Bunny" style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover", marginRight: 8, flexShrink: 0 }} />
+                      <div style={{ padding: "10px 14px", borderRadius: 18, background: C.warm, fontSize: 13, color: C.mist, fontStyle: "italic" }}>
+                        thinking...
+                      </div>
+                    </div>
+                  )}
+                  <div ref={chatEndRef} />
+                </>
+              )}
+            </div>
+
+            {/* Input */}
+            <div style={{ display: "flex", gap: 8, padding: "8px 0", borderTop: "1px solid " + C.sand }}>
+              <input
+                value={chatInput}
+                onChange={function(e) { setChatInput(e.target.value); }}
+                onKeyDown={function(e) { if (e.key === "Enter") sendChatMessage(); }}
+                placeholder="Type a message..."
+                disabled={chatLoading}
+                style={{ flex: 1, padding: "12px 16px", borderRadius: 24, border: "1.5px solid " + C.sand, fontSize: 14, fontFamily: "'Outfit',sans-serif", background: C.warm, outline: "none" }}
+              />
+              <button onClick={sendChatMessage} disabled={chatLoading || !chatInput.trim()} style={{ width: 44, height: 44, borderRadius: "50%", border: "none", background: (chatLoading || !chatInput.trim()) ? C.sand : C.olive, color: "#fff", fontSize: 18, cursor: (chatLoading || !chatInput.trim()) ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 2px 8px rgba(96,107,78,0.2)" }}>
+                ↑
+              </button>
+            </div>
+          </div>
+        )}
+
         {tab === "kitchen" && (
           <div className="fade-in">
             <h3 className="section-title">Radhika's Kitchen 🧑‍🍳</h3>
@@ -1521,6 +1666,13 @@ export default function App() {
                     </div>
                   </div>
 
+                  {/* End Period Today button - only show during period phase */}
+                  {info.phase === "period" && info.history[0] && info.history[0].ongoing !== false && (
+                    <button onClick={endCurrentPeriod} style={{ width: "100%", padding: "12px", borderRadius: 14, border: "1.5px dashed " + C.burg, background: C.burgGhost, color: C.burg, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'Outfit',sans-serif", marginBottom: 16 }}>
+                      🌸 Period has ended today
+                    </button>
+                  )}
+
                   {/* Prediction Card */}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
                     <div style={{ background: C.warm, borderRadius: 16, padding: "16px 14px", border: "1px solid " + C.sand, textAlign: "center" }}>
@@ -1562,17 +1714,210 @@ export default function App() {
                     )}
                   </div>
 
-                  {/* Phase Guide */}
-                  <h3 className="section-title">Cycle Phases Guide 📖</h3>
-                  {[
-                    { emoji: "🌸", name: "Period (Day 1-5)", desc: "Rest more, eat iron-rich foods (spinach, dal, eggs). Light walks only. Your body is shedding — be gentle.", color: C.burg },
-                    { emoji: "🌱", name: "Follicular (Day 6-13)", desc: "Energy is rising! Great time for workouts, cooking experiments, and being social. Protein up!", color: C.olive },
-                    { emoji: "✨", name: "Ovulation (Day 14-16)", desc: "Peak energy and mood. Best time for intense workouts and social plans. You'll feel amazing.", color: "#D4930D" },
-                    { emoji: "🍂", name: "Luteal (Day 17-28)", desc: "Energy dips. Cravings hit. More rest, magnesium-rich foods, gentle exercise. Don't stress about cravings.", color: "#8B6914" },
-                  ].map(function(p, i) {
-                    var isActive = (p.name.toLowerCase().indexOf(info.phase) !== -1) || (info.phase === "period" && i === 0) || (info.phase === "follicular" && i === 1) || (info.phase === "ovulation" && i === 2) || (info.phase === "luteal" && i === 3);
+                  {/* Current Phase: What to Eat */}
+                  <h3 className="section-title">Eat for Your Phase 🍽️</h3>
+                  {(function() {
+                    var phaseFoods = {
+                      period: {
+                        eat: [
+                          { emoji: "🥩", name: "Iron-rich foods", why: "Red meat, dal, spinach — replace what you're losing" },
+                          { emoji: "🍫", name: "Dark chocolate (70%+)", why: "Magnesium for cramps, mood boost" },
+                          { emoji: "🍌", name: "Bananas", why: "Potassium reduces bloating" },
+                          { emoji: "🥜", name: "Nuts & seeds", why: "Omega-3s fight inflammation" },
+                          { emoji: "🫖", name: "Ginger/chamomile tea", why: "Soothes cramps naturally" },
+                          { emoji: "🍗", name: "Chicken + eggs", why: "Protein to restore energy" },
+                        ],
+                        avoid: [
+                          { emoji: "🧂", name: "Excess salt", why: "Worsens bloating" },
+                          { emoji: "☕", name: "Too much caffeine", why: "Intensifies cramps" },
+                          { emoji: "🍷", name: "Alcohol", why: "Dehydrates, worsens mood" },
+                          { emoji: "🍬", name: "Sugary snacks", why: "Crashes energy harder" },
+                        ],
+                      },
+                      follicular: {
+                        eat: [
+                          { emoji: "🥚", name: "Eggs + lean protein", why: "Energy is rising, build muscle" },
+                          { emoji: "🥬", name: "Leafy greens", why: "Folate supports rising estrogen" },
+                          { emoji: "🫐", name: "Berries", why: "Antioxidants, low inflammation" },
+                          { emoji: "🍠", name: "Sweet potato + quinoa", why: "Sustained energy for workouts" },
+                          { emoji: "🥑", name: "Avocado + healthy fats", why: "Hormone production" },
+                          { emoji: "🐟", name: "Fish (salmon, mackerel)", why: "Omega-3s + protein" },
+                        ],
+                        avoid: [
+                          { emoji: "🍟", name: "Processed foods", why: "You can do better this week" },
+                          { emoji: "🥤", name: "Sugary drinks", why: "Crashes your rising energy" },
+                        ],
+                      },
+                      ovulation: {
+                        eat: [
+                          { emoji: "🥗", name: "Raw veggies + salads", why: "Fiber supports estrogen metabolism" },
+                          { emoji: "🥦", name: "Cruciferous vegetables", why: "Broccoli, cauliflower — hormone balance" },
+                          { emoji: "🍓", name: "Antioxidant fruits", why: "Support egg quality" },
+                          { emoji: "🌰", name: "Brazil nuts (2-3/day)", why: "Selenium for ovulation" },
+                          { emoji: "🐓", name: "High-quality protein", why: "You can handle intense workouts" },
+                          { emoji: "💧", name: "Tons of water", why: "Stay hydrated for peak energy" },
+                        ],
+                        avoid: [
+                          { emoji: "🍺", name: "Alcohol", why: "Impacts liver's estrogen clearing" },
+                          { emoji: "🌭", name: "Processed meats", why: "Inflammation at your peak phase" },
+                        ],
+                      },
+                      luteal: {
+                        eat: [
+                          { emoji: "🍠", name: "Complex carbs", why: "Sweet potato, oats — stabilize mood" },
+                          { emoji: "🌰", name: "Magnesium-rich foods", why: "Dark chocolate, nuts, seeds — reduce PMS" },
+                          { emoji: "🍗", name: "High protein meals", why: "Combat cravings, stabilize blood sugar" },
+                          { emoji: "🥥", name: "Healthy fats", why: "Coconut, ghee — hormone production" },
+                          { emoji: "🫛", name: "B6 foods", why: "Chickpeas, bananas — mood regulation" },
+                          { emoji: "🫖", name: "Spearmint tea", why: "Hormone balance, calming" },
+                        ],
+                        avoid: [
+                          { emoji: "🍰", name: "Refined sugar", why: "Worsens cravings + mood swings" },
+                          { emoji: "☕", name: "Caffeine after noon", why: "Disrupts sleep + anxiety" },
+                          { emoji: "🧂", name: "Salty foods", why: "Bloating + water retention" },
+                          { emoji: "🍷", name: "Alcohol", why: "Makes PMS symptoms worse" },
+                        ],
+                      },
+                    };
+                    var f = phaseFoods[info.phase] || phaseFoods.follicular;
                     return (
-                      <div key={i} style={{ background: isActive ? p.color + "11" : C.warm, borderRadius: 16, padding: "14px 16px", marginBottom: 8, border: isActive ? "2px solid " + p.color : "1px solid " + C.sand }}>
+                      <>
+                        <div style={{ background: C.warm, borderRadius: 18, padding: "16px", marginBottom: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+                          <p style={{ fontSize: 13, fontWeight: 600, color: C.olive, margin: "0 0 10px" }}>✅ Eat more of these</p>
+                          {f.eat.map(function(item, i) {
+                            return (
+                              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 8 }}>
+                                <span style={{ fontSize: 18 }}>{item.emoji}</span>
+                                <div style={{ flex: 1 }}>
+                                  <p style={{ fontSize: 13, fontWeight: 500, margin: 0, color: C.charcoal }}>{item.name}</p>
+                                  <p style={{ fontSize: 11, color: C.stone, margin: 0, lineHeight: 1.4 }}>{item.why}</p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <div style={{ background: C.burgGhost, borderRadius: 18, padding: "16px", marginBottom: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+                          <p style={{ fontSize: 13, fontWeight: 600, color: C.burg, margin: "0 0 10px" }}>⚠️ Minimize these</p>
+                          {f.avoid.map(function(item, i) {
+                            return (
+                              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 8 }}>
+                                <span style={{ fontSize: 18 }}>{item.emoji}</span>
+                                <div style={{ flex: 1 }}>
+                                  <p style={{ fontSize: 13, fontWeight: 500, margin: 0, color: C.charcoal }}>{item.name}</p>
+                                  <p style={{ fontSize: 11, color: C.stone, margin: 0, lineHeight: 1.4 }}>{item.why}</p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
+                    );
+                  })()}
+
+                  {/* Current Phase: Movement Guide */}
+                  <h3 className="section-title">Movement for Your Phase 💪</h3>
+                  {(function() {
+                    var phaseMovement = {
+                      period: {
+                        intensity: "Low · Rest is productive",
+                        doList: [
+                          { emoji: "🧘\u200d♀️", name: "Gentle yoga", note: "Child's pose, cat-cow, supported twists" },
+                          { emoji: "🚶\u200d♀️", name: "Slow walks", note: "15-20 mins outdoors — light movement helps cramps" },
+                          { emoji: "🛏️", name: "Stretching + rest", note: "Listen to your body. Bed is okay." },
+                        ],
+                        dontList: [
+                          { emoji: "🏋️\u200d♀️", name: "Heavy lifting", note: "Days 1-2 especially — your body is working hard already" },
+                          { emoji: "🏃\u200d♀️", name: "HIIT / intense cardio", note: "Spikes cortisol when you need calm" },
+                        ],
+                      },
+                      follicular: {
+                        intensity: "Rising · Push yourself",
+                        doList: [
+                          { emoji: "🏋️\u200d♀️", name: "Strength training", note: "Your body builds muscle best now" },
+                          { emoji: "💃", name: "Dance workouts", note: "Energy is high — put on Fred Again and go!" },
+                          { emoji: "🏃\u200d♀️", name: "Running or HIIT", note: "Great time for cardio challenges" },
+                          { emoji: "🧗\u200d♀️", name: "Try new workouts", note: "You're more willing to experiment" },
+                        ],
+                        dontList: [
+                          { emoji: "😴", name: "Don't skip workouts", note: "This is your strongest week!" },
+                        ],
+                      },
+                      ovulation: {
+                        intensity: "Peak · Go all out",
+                        doList: [
+                          { emoji: "⚡", name: "High-intensity workouts", note: "Your peak performance window" },
+                          { emoji: "🏋️\u200d♀️", name: "Max strength training", note: "Highest testosterone — lift heavier" },
+                          { emoji: "🚴\u200d♀️", name: "Spinning / long cardio", note: "Endurance is at its peak" },
+                          { emoji: "🤸\u200d♀️", name: "Group classes", note: "Social energy is high — enjoy!" },
+                        ],
+                        dontList: [
+                          { emoji: "💤", name: "Don't waste this window", note: "Your body is primed for effort" },
+                        ],
+                      },
+                      luteal: {
+                        intensity: "Winding down · Gentle is best",
+                        doList: [
+                          { emoji: "🧘\u200d♀️", name: "Pilates & yoga", note: "Restorative movements suit your body" },
+                          { emoji: "🚶\u200d♀️", name: "Long walks", note: "Nature walks help PMS mood dips" },
+                          { emoji: "🏊\u200d♀️", name: "Swimming", note: "Low-impact full body workout" },
+                          { emoji: "💪", name: "Light strength training", note: "Lower weights, more reps — avoid PRs" },
+                        ],
+                        dontList: [
+                          { emoji: "🔥", name: "Intense HIIT daily", note: "Your cortisol is already higher" },
+                          { emoji: "🥵", name: "Hot workouts (if tired)", note: "Honor dips in energy" },
+                        ],
+                      },
+                    };
+                    var m = phaseMovement[info.phase] || phaseMovement.follicular;
+                    return (
+                      <>
+                        <div style={{ background: "linear-gradient(140deg, " + info.phaseColor + "15, " + info.phaseColor + "05)", borderRadius: 18, padding: "14px 16px", marginBottom: 12, border: "1px solid " + info.phaseColor + "30" }}>
+                          <p style={{ fontSize: 11, color: info.phaseColor, fontWeight: 600, margin: 0, textTransform: "uppercase", letterSpacing: 0.5 }}>Intensity</p>
+                          <p style={{ fontSize: 15, fontWeight: 600, margin: "2px 0 0", color: C.charcoal }}>{m.intensity}</p>
+                        </div>
+                        <div style={{ background: C.warm, borderRadius: 18, padding: "16px", marginBottom: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+                          <p style={{ fontSize: 13, fontWeight: 600, color: C.olive, margin: "0 0 10px" }}>✅ Do these</p>
+                          {m.doList.map(function(item, i) {
+                            return (
+                              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 8 }}>
+                                <span style={{ fontSize: 18 }}>{item.emoji}</span>
+                                <div style={{ flex: 1 }}>
+                                  <p style={{ fontSize: 13, fontWeight: 500, margin: 0, color: C.charcoal }}>{item.name}</p>
+                                  <p style={{ fontSize: 11, color: C.stone, margin: 0, lineHeight: 1.4 }}>{item.note}</p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <div style={{ background: C.burgGhost, borderRadius: 18, padding: "16px", marginBottom: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+                          <p style={{ fontSize: 13, fontWeight: 600, color: C.burg, margin: "0 0 10px" }}>⚠️ Avoid these</p>
+                          {m.dontList.map(function(item, i) {
+                            return (
+                              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 8 }}>
+                                <span style={{ fontSize: 18 }}>{item.emoji}</span>
+                                <div style={{ flex: 1 }}>
+                                  <p style={{ fontSize: 13, fontWeight: 500, margin: 0, color: C.charcoal }}>{item.name}</p>
+                                  <p style={{ fontSize: 11, color: C.stone, margin: 0, lineHeight: 1.4 }}>{item.note}</p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
+                    );
+                  })()}
+
+                  {/* Phase Guide Summary */}
+                  <h3 className="section-title">All Phases at a Glance 📖</h3>
+                  {[
+                    { emoji: "🌸", name: "Period (Day 1-5)", desc: "Rest, iron-rich foods, gentle movement. Your body is working — be kind to it.", color: C.burg, phase: "period" },
+                    { emoji: "🌱", name: "Follicular (Day 6-13)", desc: "Energy rising. Protein + strength training. Try new things!", color: C.olive, phase: "follicular" },
+                    { emoji: "✨", name: "Ovulation (Day 14-16)", desc: "Peak energy. HIIT, heavy lifts, social plans. You feel unstoppable.", color: "#D4930D", phase: "ovulation" },
+                    { emoji: "🍂", name: "Luteal (Day 17-28)", desc: "Wind down. Complex carbs, magnesium, gentle yoga. PMS is normal.", color: "#8B6914", phase: "luteal" },
+                  ].map(function(p, i) {
+                    var isActive = info.phase === p.phase;
+                    return (
+                      <div key={i} style={{ background: isActive ? p.color + "15" : C.warm, borderRadius: 16, padding: "14px 16px", marginBottom: 8, border: isActive ? "2px solid " + p.color : "none", boxShadow: isActive ? "none" : "0 1px 3px rgba(0,0,0,0.04)" }}>
                         <p style={{ fontSize: 14, fontWeight: 600, margin: "0 0 4px", color: p.color }}>{p.emoji} {p.name} {isActive ? " ← You're here" : ""}</p>
                         <p style={{ fontSize: 12, color: C.stone, margin: 0, lineHeight: 1.5 }}>{p.desc}</p>
                       </div>
@@ -1601,26 +1946,16 @@ export default function App() {
               <div className="overlay">
                 <div style={{ background: C.cream, borderRadius: 28, padding: "32px 24px", maxWidth: 340, width: "90%", textAlign: "center" }}>
                   <p style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 20, color: C.burg, marginBottom: 4 }}>Log Period 🌸</p>
-                  <p style={{ fontSize: 12, color: C.stone, marginBottom: 20 }}>When did your last period start?</p>
+                  <p style={{ fontSize: 12, color: C.stone, marginBottom: 20 }}>When did it start?</p>
 
-                  <div style={{ marginBottom: 16, textAlign: "left" }}>
+                  <div style={{ marginBottom: 20, textAlign: "left" }}>
                     <label style={{ fontSize: 12, color: C.stone, display: "block", marginBottom: 4 }}>Start Date</label>
                     <input type="date" value={periodStartDate} onChange={function(e) { setPeriodStartDate(e.target.value); }}
                       style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1.5px solid " + C.sand, fontSize: 14, fontFamily: "'Outfit',sans-serif", background: C.warm, outline: "none" }} />
                   </div>
 
-                  <div style={{ marginBottom: 20, textAlign: "left" }}>
-                    <label style={{ fontSize: 12, color: C.stone, display: "block", marginBottom: 4 }}>How many days did it last?</label>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      {["3", "4", "5", "6", "7"].map(function(d) {
-                        return (
-                          <button key={d} onClick={function() { setPeriodLength(d); }}
-                            style={{ flex: 1, padding: "10px 0", borderRadius: 10, border: periodLength === d ? "2px solid " + C.burg : "1px solid " + C.sand, background: periodLength === d ? C.burgGhost : C.warm, color: periodLength === d ? C.burg : C.stone, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
-                            {d}
-                          </button>
-                        );
-                      })}
-                    </div>
+                  <div style={{ background: C.oliveGhost, borderRadius: 12, padding: "10px 14px", marginBottom: 16, fontSize: 11, color: C.olive, textAlign: "left", lineHeight: 1.5 }}>
+                    💡 We'll use your typical cycle to track duration. You can mark it as ended anytime from the cycle tab.
                   </div>
 
                   <button onClick={savePeriod} disabled={!periodStartDate} className="btn-primary" style={{ width: "100%", marginBottom: 8, background: periodStartDate ? C.burg : C.sand }}>Save 🌸</button>
@@ -1701,7 +2036,7 @@ export default function App() {
       </main>
 
       <nav className="bottom-nav">
-        {[["home", "🏠", "Home"], ["reports", "📊", "Reports"], ["kitchen", "🧑‍🍳", "Kitchen"], ["cycle", "🌸", "Cycle"], ["health", "🩺", "Health"]].map(function(t) {
+        {[["home", "🏠", "Home"], ["chat", "💬", "Chat"], ["kitchen", "🧑‍🍳", "Kitchen"], ["cycle", "🌸", "Cycle"], ["health", "🩺", "Health"]].map(function(t) {
           return (
             <button key={t[0]} className={"nav-btn" + (tab === t[0] ? " nav-active" : "")} onClick={function() { setTab(t[0]); }}>
               <span className="nav-icon">{t[1]}</span>
